@@ -24,46 +24,56 @@ export default function Pagination({ totalItems = 10, itemsPerPage = 9 }: Pagina
   if (totalPages <= 1) return null;
 
   return (
-    <div className="flex justify-center items-center gap-3 mt-8">
+    <div className="flex justify-center items-center gap-4">
+      {/* Previous Button */}
       <button
         onClick={() => goToPage(Math.max(1, currentPage - 1))}
         disabled={currentPage === 1}
-        className="p-2 rounded-lg border border-gray-200 dark:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+        className="flex items-center gap-2 px-6 py-4 rounded-2xl border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all hover:border-gray-300"
       >
-        <ChevronLeft size={18} />
+        <ChevronLeft size={20} />
+        <span className="font-medium text-sm">Previous</span>
       </button>
 
+      {/* Page Numbers */}
       <div className="flex items-center gap-2">
         {[...Array(totalPages)].map((_, i) => {
           const page = i + 1;
+          
+          // Show first, last, current, and pages close to current
           if (page === 1 || page === totalPages || Math.abs(page - currentPage) <= 2) {
             return (
               <button
                 key={page}
                 onClick={() => goToPage(page)}
-                className={`w-10 h-10 rounded-lg font-medium transition-colors ${
-                  page === currentPage
-                    ? 'bg-blue-600 text-white'
-                    : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300'
-                }`}
+                className={`w-12 h-12 rounded-2xl font-semibold transition-all text-sm
+                  ${page === currentPage 
+                    ? 'bg-gray-900 text-white shadow-lg' 
+                    : 'hover:bg-gray-100 text-gray-600 hover:text-gray-900'
+                  }`}
               >
                 {page}
               </button>
             );
           }
+          
+          // Ellipsis
           if (page === currentPage - 3 || page === currentPage + 3) {
-            return <span key={page} className="text-gray-400">…</span>;
+            return <span key={page} className="text-gray-400 px-2">…</span>;
           }
+          
           return null;
         })}
       </div>
 
+      {/* Next Button */}
       <button
         onClick={() => goToPage(Math.min(totalPages, currentPage + 1))}
         disabled={currentPage === totalPages}
-        className="p-2 rounded-lg border border-gray-200 dark:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+        className="flex items-center gap-2 px-6 py-4 rounded-2xl border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all hover:border-gray-300"
       >
-        <ChevronRight size={18} />
+        <span className="font-medium text-sm">Next</span>
+        <ChevronRight size={20} />
       </button>
     </div>
   );

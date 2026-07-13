@@ -9,7 +9,8 @@ import {
   CreditCard, 
   Star, 
   Settings, 
-  LogOut 
+  LogOut,
+  User
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -22,6 +23,7 @@ export default function Sidebar() {
     { icon: <Calendar size={20} />, label: 'My Bookings', href: '/dashboard/bookings' },
     { icon: <CreditCard size={20} />, label: 'Payments', href: '/dashboard/payments' },
     { icon: <Star size={20} />, label: 'Wishlist', href: '/dashboard/wishlist' },
+    { icon: <User size={20} />, label: 'My Profile', href: '/dashboard/profile' },
     { icon: <Settings size={20} />, label: 'Settings', href: '/dashboard/settings' },
   ];
 
@@ -42,8 +44,11 @@ export default function Sidebar() {
       {/* Navigation */}
       <nav className="flex-1 px-6 space-y-1">
         {menuItems.map((item) => {
-          const isActive = pathname === item.href || 
-                          (item.href !== '/' && pathname?.startsWith(item.href));
+          const isActive = item.href === '/' 
+            ? pathname === '/' 
+            : item.href === '/dashboard' 
+              ? (pathname === '/dashboard' || pathname === '/dashboard/') 
+              : pathname === item.href || pathname?.startsWith(item.href + '/');
 
           return (
             <Link key={item.label} href={item.href}>
@@ -68,7 +73,17 @@ export default function Sidebar() {
 
       {/* Logout Button */}
       <div className="p-6 mt-auto border-t border-white/10">
-        <button className="flex items-center gap-4 w-full px-6 py-4 text-red-400 hover:bg-red-500/10 hover:text-red-500 rounded-2xl transition-all font-medium">
+        <button
+          onClick={() => {
+            try {
+              localStorage.removeItem("user");
+            } catch (e) {
+              console.warn("Failed to remove user from localStorage in Sidebar:", e);
+            }
+            window.location.href = "/";
+          }}
+          className="flex items-center gap-4 w-full px-6 py-4 text-red-400 hover:bg-red-500/10 hover:text-red-500 rounded-2xl transition-all font-medium cursor-pointer"
+        >
           <LogOut size={20} />
           <span>Sign Out</span>
         </button>

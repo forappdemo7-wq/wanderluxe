@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import { Star, MapPin, Search, SlidersHorizontal } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCurrency } from "@/context/CurrencyContext";
@@ -18,13 +18,9 @@ const signatureHotels = [
   { id: "hot-22", name: "Badrutt’s Palace", location: "St. Moritz, Switzerland", type: "Alpine Luxury", priceUSD: 2100, rating: 4.9, image: "https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?auto=format&fit=crop&w=800&q=80" },
 ];
 
-// Animation Variants
 const containerVariants = {
   hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.08 },
-  },
+  visible: { opacity: 1, transition: { staggerChildren: 0.08 } },
 };
 
 const cardVariants = {
@@ -32,10 +28,8 @@ const cardVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
 };
 
-// Hotel Card Component
 const HotelCard = ({ hotel }: { hotel: typeof signatureHotels[0] }) => {
   const { formatPrice } = useCurrency();
-
   return (
     <motion.div
       variants={cardVariants}
@@ -44,12 +38,10 @@ const HotelCard = ({ hotel }: { hotel: typeof signatureHotels[0] }) => {
       className="group bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-300 overflow-hidden"
     >
       <div className="relative h-64 overflow-hidden">
-        {/* Rating Badge */}
         <div className="absolute top-4 right-4 z-10 bg-white/95 backdrop-blur-md px-3.5 py-1 rounded-full flex items-center gap-1.5 shadow-sm">
           <Star size={15} className="text-amber-400 fill-amber-400" />
           <span className="text-sm font-bold text-gray-900">{hotel.rating}</span>
         </div>
-
         <img
           src={hotel.image}
           alt={hotel.name}
@@ -62,16 +54,13 @@ const HotelCard = ({ hotel }: { hotel: typeof signatureHotels[0] }) => {
         <span className="inline-block text-xs uppercase tracking-widest font-bold text-amber-600 bg-amber-50 px-3 py-1 rounded-full mb-3">
           {hotel.type}
         </span>
-
         <h3 className="text-2xl font-bold text-gray-900 group-hover:text-amber-600 transition-colors leading-tight">
           {hotel.name}
         </h3>
-
         <div className="flex items-center text-gray-500 text-sm mt-2 mb-6">
           <MapPin size={16} className="mr-1.5 flex-shrink-0" />
           {hotel.location}
         </div>
-
         <div className="flex items-baseline gap-1 border-t border-gray-100 pt-5">
           <span className="text-3xl font-black text-gray-900">
             {formatPrice(hotel.priceUSD)}
@@ -83,33 +72,70 @@ const HotelCard = ({ hotel }: { hotel: typeof signatureHotels[0] }) => {
   );
 };
 
-// Main Hotels Page
 export default function HotelsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedType, setSelectedType] = useState("All");
+  const [isFilterVisible, setIsFilterVisible] = useState(true);
 
-  const categories = useMemo(() => 
-    ["All", ...Array.from(new Set(signatureHotels.map((h) => h.type)))],
+  // Use refs to track scroll without causing re‑renders
+  const lastScrollY = useRef(0);
+  const ticking = useRef(false);
+
+  const categories = useMemo(
+    () => ["All", ...Array.from(new Set(signatureHotels.map((h) => h.type)))],
     []
   );
 
   const filteredHotels = signatureHotels.filter((hotel) => {
-    const matchesSearch = 
+    const matchesSearch =
       hotel.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       hotel.location.toLowerCase().includes(searchQuery.toLowerCase());
-    
     const matchesType = selectedType === "All" || hotel.type === selectedType;
-    
     return matchesSearch && matchesType;
   });
+
+  // Scroll handler – choose your preferred behavior below
+  useEffect(() => {
+    const handleScroll = () => {
+      if (ticking.current) return;
+      ticking.current = true;
+
+      requestAnimationFrame(() => {
+        const currentScrollY = window.scrollY;
+
+        // ---------------------------------------------------------------
+        // CHOOSE ONE BEHAVIOR – uncomment the block you prefer
+        // ---------------------------------------------------------------
+
+        // OPTION 1: Hide on scroll down, show on any scroll up (classic)
+        // if (currentScrollY > lastScrollY.current && currentScrollY > 80) {
+        //   setIsFilterVisible(false);
+        // } else if (currentScrollY < lastScrollY.current - 10) {
+        //   setIsFilterVisible(true);
+        // }
+
+        // OPTION 2: Hide on scroll down, show ONLY when near top (scrollY < 100)
+        if (currentScrollY > lastScrollY.current && currentScrollY > 80) {
+          setIsFilterVisible(false);
+        } else if (currentScrollY < 100) {
+          setIsFilterVisible(true);
+        }
+
+        lastScrollY.current = currentScrollY;
+        ticking.current = false;
+      });
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []); // Runs once – all scroll data is kept in refs
 
   return (
     <main className="bg-[#fcfcfc] min-h-screen px-6 py-20">
       <div className="max-w-7xl mx-auto">
-        
         {/* Header */}
         <div className="text-center mb-16">
-          <motion.h1 
+          <motion.h1
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             className="text-5xl md:text-6xl font-black tracking-tighter text-gray-900 mb-4"
@@ -121,35 +147,46 @@ export default function HotelsPage() {
           </p>
         </div>
 
-        {/* Search & Filter Bar */}
-        <div className="flex flex-col lg:flex-row gap-4 mb-12 items-center justify-between sticky top-6 z-20 bg-[#fcfcfc]/95 backdrop-blur-lg p-5 rounded-3xl border border-gray-100 shadow-sm">
-          <div className="relative w-full lg:w-96">
-            <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-            <input
-              type="text"
-              placeholder="Search by hotel or destination..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-14 pr-5 py-3.5 rounded-2xl border border-gray-200 focus:border-amber-400 focus:ring-amber-400 outline-none transition-all text-base"
-            />
-          </div>
+        {/* Filter Bar – always in DOM, animated visibility */}
+        <motion.div
+          initial={{ opacity: 1, y: 0 }}
+          animate={{
+            opacity: isFilterVisible ? 1 : 0,
+            y: isFilterVisible ? 0 : -20,
+          }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+          style={{ pointerEvents: isFilterVisible ? "auto" : "none" }}
+          className="sticky top-6 z-50 bg-white/95 backdrop-blur-2xl p-5 rounded-3xl border border-gray-100 shadow-2xl mb-10"
+        >
+          <div className="flex flex-col lg:flex-row gap-4 items-center">
+            <div className="relative w-full lg:w-96">
+              <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+              <input
+                type="text"
+                placeholder="Search by hotel or destination..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-14 pr-5 py-3.5 rounded-2xl border border-gray-200 focus:border-amber-400 focus:ring-amber-400 outline-none transition-all"
+              />
+            </div>
 
-          <div className="flex gap-2 overflow-x-auto pb-2 lg:pb-0 w-full lg:w-auto no-scrollbar">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setSelectedType(cat)}
-                className={`px-6 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all ${
-                  selectedType === cat 
-                    ? "bg-amber-600 text-white shadow-md" 
-                    : "bg-white text-gray-600 border border-gray-200 hover:border-amber-300 hover:text-gray-900"
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
+            <div className="flex gap-2 overflow-x-auto pb-2 lg:pb-0 w-full lg:w-auto no-scrollbar">
+              {categories.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedType(cat)}
+                  className={`px-6 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap flex-shrink-0 transition-all ${
+                    selectedType === cat
+                      ? "bg-amber-600 text-white shadow-md"
+                      : "bg-white text-gray-600 border border-gray-200 hover:border-amber-300 hover:text-gray-900"
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Hotels Grid */}
         <motion.div
@@ -160,11 +197,9 @@ export default function HotelsPage() {
         >
           <AnimatePresence mode="popLayout">
             {filteredHotels.length > 0 ? (
-              filteredHotels.map((hotel) => (
-                <HotelCard key={hotel.id} hotel={hotel} />
-              ))
+              filteredHotels.map((hotel) => <HotelCard key={hotel.id} hotel={hotel} />)
             ) : (
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 className="col-span-full py-24 text-center"

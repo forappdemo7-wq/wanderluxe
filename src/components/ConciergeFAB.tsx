@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence, useDragControls } from 'motion/react';
 import { Send, X, Sparkles, Compass, AlertCircle, MoreHorizontal, MessageSquare, CornerDownLeft, Bot, User, HelpCircle, Search, ArrowUp, RotateCcw } from 'lucide-react';
 import { useCurrency } from '../context/CurrencyContext';
@@ -29,22 +30,20 @@ interface Message {
 
 // Automatically changing luxury suggestions/questions to type out
 const dynamicQueries = [
-  { prefix: "Hey, True! ", highlight: "What can you do?" },
+  { prefix: "Tell me about Kyoto Zen & ", highlight: "Tokyo Neon" },
   { prefix: "How much does the Ritz Paris ", highlight: "cost per night?" },
   { prefix: "How can I ", highlight: "help you today?" },
   { prefix: "What is the finest resort in ", highlight: "Bali?" },
   { prefix: "How do I book a private jet to ", highlight: "Tokyo?" },
   { prefix: "Can you recommend a Michelin restaurant in ", highlight: "Paris?" },
-  { prefix: "Is there a helicopter tour over ", highlight: "Manhattan?" },
-  { prefix: "What is George Harrison's ", highlight: "loyalty status?" }
+  { prefix: "What is the cancellation and ", highlight: "refund policy?" }
 ];
 
 export default function ConciergeFAB({ activeView, setActiveView, onSyncData, user }: ConciergeFABProps) {
+  const router = useRouter();
   const { formatPrice } = useCurrency();
   const { butlerEnabled } = useCursor();
   
-  if (!butlerEnabled) return null;
-
   const [isOpen, setIsOpen] = useState(false);
   const dragControls = useDragControls();
   const isDragging = useRef(false);
@@ -79,6 +78,15 @@ export default function ConciergeFAB({ activeView, setActiveView, onSyncData, us
   const [delay, setDelay] = useState(80);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Auto-resize the input textarea as user types
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 140)}px`;
+    }
+  }, [inputVal]);
 
   // Typewriter effect logic
   useEffect(() => {
@@ -174,53 +182,218 @@ export default function ConciergeFAB({ activeView, setActiveView, onSyncData, us
       let richCard: any = data.richData || undefined;
       const responseText = data.response || "";
 
-      if (!richCard) {
-        if (responseText.toLowerCase().includes("viceroy bali")) {
-          richCard = {
-            type: 'hotel',
-            title: "Viceroy Bali Jungle Resort",
-            subtitle: "Ubud, Bali • Jungle Sanctuary with Private Infinity Plunge Pools",
-            price: "$450 / night",
-            meta: "Elite Preferred Partner",
-            linkView: "explorations"
-          };
-        } else if (responseText.toLowerCase().includes("gulfstream g650er")) {
-          richCard = {
-            type: 'jet',
-            title: "Gulfstream G650ER Private Jet",
-            subtitle: "Transcontinental Ultra-Quiet Cabin (14 Guests)",
-            price: "$9,500 / hr",
-            meta: "Certified Premium FAA Crew",
-            linkView: "jets-cruises"
-          };
-        } else if (responseText.toLowerCase().includes("ritz paris")) {
-          richCard = {
-            type: 'hotel',
-            title: "Ritz Paris Place Vendôme",
-            subtitle: "Paris, France • Gold-gilded Royalty & 3-Star Michelin Gastronomy",
-            price: "$850 / night",
-            meta: "Historic Elite Heritage Stay",
-            linkView: "explorations"
-          };
-        } else if (responseText.toLowerCase().includes("mount batur")) {
-          richCard = {
-            type: 'tour',
-            title: "Mount Batur Volcano Sunrise Trek",
-            subtitle: "Bali, Indonesia • Guided sunrise climb above the clouds",
-            price: "$75 / person",
-            meta: "Includes private chalet breakfast",
-            linkView: "explorations"
-          };
-        } else if (responseText.toLowerCase().includes("locavore")) {
-          richCard = {
-            type: 'restaurant',
-            title: "Locavore Fine Dining Ubud",
-            subtitle: "Ubud • 100% locally sourced premium Indonesian cuisine",
-            price: "Fine Gastronomy Index",
-            meta: "Requires reservation 48 hrs prior",
-            linkView: "explorations"
-          };
-        }
+      // Smart semantic override to match signature items mentioned in prompt or response
+      const lowerResp = responseText.toLowerCase();
+      const lowerPrompt = textToSend.toLowerCase();
+
+      if (lowerResp.includes("kyoto zen") || lowerResp.includes("tokyo neon") || lowerPrompt.includes("kyoto zen") || lowerPrompt.includes("tokyo neon")) {
+        richCard = {
+          type: 'tour',
+          title: "Kyoto Zen & Tokyo Neon",
+          subtitle: "Tokyo, Hakone & Kyoto • Curated Contrast of Ancient Serenity & Cyberpunk Neon",
+          price: "$3,800 / person",
+          meta: "Duration: 8 Days",
+          url: "/packages/pkg-3",
+          linkView: "explorations"
+        };
+      } else if (lowerResp.includes("rajasthan") || lowerPrompt.includes("rajasthan")) {
+        richCard = {
+          type: 'tour',
+          title: "Royal Rajasthan Trail",
+          subtitle: "Jaipur, Jodhpur & Udaipur • Pink Palaces & Romantic Lake Pavilions",
+          price: "$3,200 / person",
+          meta: "Duration: 10 Days",
+          url: "/packages/pkg-1",
+          linkView: "explorations"
+        };
+      } else if (lowerResp.includes("alpine luxury") || lowerResp.includes("alpine express") || lowerPrompt.includes("alpine luxury") || lowerPrompt.includes("alpine express")) {
+        richCard = {
+          type: 'tour',
+          title: "Alpine Luxury Express",
+          subtitle: "Zurich, Zermatt & St. Moritz • Breathtaking Swiss Alps Rail Expedition",
+          price: "$4,500 / person",
+          meta: "Duration: 7 Days",
+          url: "/packages/pkg-2",
+          linkView: "explorations"
+        };
+      } else if (lowerResp.includes("mount batur") || lowerPrompt.includes("mount batur") || lowerResp.includes("batur sunrise") || lowerPrompt.includes("batur sunrise")) {
+        richCard = {
+          type: 'tour',
+          title: "Mount Batur Volcano Sunrise Trek",
+          subtitle: "Bali, Indonesia • Guided sunrise climb above the clouds",
+          price: "$75 / person",
+          meta: "Duration: 7 Hours",
+          url: "/tours/3",
+          linkView: "explorations"
+        };
+      } else if (lowerResp.includes("uluwatu") || lowerPrompt.includes("uluwatu")) {
+        richCard = {
+          type: 'tour',
+          title: "Uluwatu Sunset Temple & Kecak Dance Tour",
+          subtitle: "Bali, Indonesia • Sea cliff temple and traditional fire dance",
+          price: "$45 / person",
+          meta: "Duration: 5 Hours",
+          url: "/tours/3",
+          linkView: "explorations"
+        };
+      } else if (lowerResp.includes("tulamben") || lowerPrompt.includes("tulamben") || lowerResp.includes("shipwreck scuba") || lowerPrompt.includes("shipwreck scuba")) {
+        richCard = {
+          type: 'tour',
+          title: "Tulamben USAT Liberty Shipwreck Scuba Dive",
+          subtitle: "Bali, Indonesia • Dive one of the world's most accessible WWII shipwrecks",
+          price: "$110 / person",
+          meta: "Duration: 8 Hours",
+          url: "/tours/3",
+          linkView: "explorations"
+        };
+      } else if (lowerResp.includes("fuji") || lowerPrompt.includes("fuji") || lowerResp.includes("kawaguchi") || lowerPrompt.includes("kawaguchi")) {
+        richCard = {
+          type: 'tour',
+          title: "Mt. Fuji & Lake Kawaguchi Scenic Tour",
+          subtitle: "Tokyo, Japan • Scenic tour to Mount Fuji's 5th Station & lake cruise",
+          price: "$120 / person",
+          meta: "Duration: 10 Hours",
+          url: "/tours/1",
+          linkView: "explorations"
+        };
+      } else if (lowerResp.includes("shibuya night") || lowerPrompt.includes("shibuya night") || lowerResp.includes("street food") || lowerPrompt.includes("street food")) {
+        richCard = {
+          type: 'tour',
+          title: "Shibuya Night Street Food & Bar Crawl",
+          subtitle: "Tokyo, Japan • Traditional food & bar crawl in glowing backalleys",
+          price: "$65 / person",
+          meta: "Duration: 3.5 Hours",
+          url: "/tours/1",
+          linkView: "explorations"
+        };
+      } else if (lowerResp.includes("seine river") || lowerPrompt.includes("seine river") || lowerResp.includes("dinner cruise") || lowerPrompt.includes("dinner cruise")) {
+        richCard = {
+          type: 'tour',
+          title: "Eiffel Tower Access & Seine River Dinner Cruise",
+          subtitle: "Paris, France • Seine river dinner cruise & Eiffel Tower skip-the-line access",
+          price: "$145 / person",
+          meta: "Duration: 4 Hours",
+          url: "/tours/2",
+          linkView: "explorations"
+        };
+      } else if (lowerResp.includes("louvre") || lowerPrompt.includes("louvre")) {
+        richCard = {
+          type: 'tour',
+          title: "Louvre Museum Guided Masterpieces Skip-the-Line",
+          subtitle: "Paris, France • Expert historian guide for Louvre highlights",
+          price: "$80 / person",
+          meta: "Duration: 3 Hours",
+          url: "/tours/2",
+          linkView: "explorations"
+        };
+      } else if (lowerResp.includes("helicopter flight") || lowerPrompt.includes("helicopter flight") || lowerResp.includes("manhattan skyline") || lowerPrompt.includes("manhattan skyline")) {
+        richCard = {
+          type: 'tour',
+          title: "Helicopter Flight Over Manhattan Skyline",
+          subtitle: "New York, USA • Panoramic aerial views of Statue of Liberty & Central Park",
+          price: "$220 / person",
+          meta: "Duration: 20 Mins",
+          url: "/destinations/dest-ny",
+          linkView: "explorations"
+        };
+      } else if (lowerResp.includes("broadway") || lowerPrompt.includes("broadway")) {
+        richCard = {
+          type: 'tour',
+          title: "Broadway Insider Walking Tour & Show Access",
+          subtitle: "New York, USA • Walking tour led by Broadway performer with premium reserved tickets",
+          price: "$165 / person",
+          meta: "Duration: 5 Hours",
+          url: "/destinations/dest-ny",
+          linkView: "explorations"
+        };
+      } else if (lowerResp.includes("viceroy bali") || lowerPrompt.includes("viceroy bali")) {
+        richCard = {
+          type: 'hotel',
+          title: "Viceroy Bali Jungle Resort",
+          subtitle: "Ubud, Bali • Jungle Sanctuary with Private Infinity Plunge Pools",
+          price: "$450 / night",
+          meta: "Elite Preferred Partner",
+          url: "/hotels",
+          linkView: "explorations"
+        };
+      } else if (lowerResp.includes("gulfstream g650er") || lowerPrompt.includes("gulfstream g650er")) {
+        richCard = {
+          type: 'jet',
+          title: "Gulfstream G650ER Private Jet",
+          subtitle: "Transcontinental Ultra-Quiet Cabin (14 Guests)",
+          price: "$9,500 / hr",
+          meta: "Certified Premium FAA Crew",
+          url: "/jets",
+          linkView: "jets-cruises"
+        };
+      } else if (lowerResp.includes("ritz paris") || lowerPrompt.includes("ritz paris")) {
+        richCard = {
+          type: 'hotel',
+          title: "Ritz Paris Place Vendôme",
+          subtitle: "Paris, France • Gold-gilded Royalty & 3-Star Michelin Gastronomy",
+          price: "$850 / night",
+          meta: "Historic Elite Heritage Stay",
+          url: "/hotels",
+          linkView: "explorations"
+        };
+      } else if (lowerResp.includes("locavore") || lowerPrompt.includes("locavore")) {
+        richCard = {
+          type: 'restaurant',
+          title: "Locavore Fine Dining Ubud",
+          subtitle: "Ubud • 100% locally sourced premium Indonesian cuisine",
+          price: "Fine Gastronomy Index",
+          meta: "Requires reservation 48 hrs prior",
+          url: "/restaurants/rest-bali-locavore",
+          linkView: "explorations"
+        };
+      } else if (lowerResp.includes("aman tokyo") || lowerPrompt.includes("aman tokyo")) {
+        richCard = {
+          type: 'hotel',
+          title: "Aman Tokyo",
+          subtitle: "Tokyo, Japan • Minimalist luxury sanctuary high above the city",
+          price: "$950 / night",
+          meta: "Elite Preferred Partner",
+          url: "/hotels",
+          linkView: "explorations"
+        };
+      } else if (lowerResp.includes("station hotel") || lowerPrompt.includes("station hotel")) {
+        richCard = {
+          type: 'hotel',
+          title: "The Tokyo Station Hotel",
+          subtitle: "Tokyo, Japan • Historic landmark within the iconic station building",
+          price: "$390 / night",
+          meta: "Premier Classic Stay",
+          url: "/hotels",
+          linkView: "explorations"
+        };
+      } else if (lowerResp.includes("jiro") || lowerPrompt.includes("jiro")) {
+        richCard = {
+          type: 'restaurant',
+          title: "Sukiyabashi Jiro Roppongi",
+          subtitle: "Tokyo, Japan • Traditional, master-crafted world-class sushi",
+          price: "Fine Dining Index",
+          meta: "Requires 48-hr advanced booking",
+          url: "/restaurants/rest-tokyo-jiro",
+          linkView: "explorations"
+        };
+      } else if (lowerResp.includes("ichiran") || lowerPrompt.includes("ichiran")) {
+        richCard = {
+          type: 'restaurant',
+          title: "Ichiran Ramen Shinjuku",
+          subtitle: "Tokyo, Japan • Quintessential authentic Hakata Tonkotsu Ramen",
+          price: "Casual Dining",
+          meta: "No reservations required",
+          url: "/restaurants/rest-tokyo-ichiran",
+          linkView: "explorations"
+        };
+      } else if (lowerResp.includes("cancel") || lowerPrompt.includes("cancel") || lowerResp.includes("refund") || lowerPrompt.includes("refund")) {
+        richCard = {
+          type: 'booking',
+          title: "Manage Bookings & Policies",
+          subtitle: "Review cancellation parameters, active itineraries, and request eligible refunds.",
+          meta: "Instant Luxury Portal",
+          linkView: "dashboard"
+        };
       }
 
       if (richCard && onSyncData) {
@@ -252,6 +425,116 @@ export default function ConciergeFAB({ activeView, setActiveView, onSyncData, us
   const handleQuickQuestion = (q: string) => {
     handleSendMessage(q);
   };
+
+  const handleExploreNow = (richData: any) => {
+    if (!richData) return;
+
+    let route = "";
+    const title = (richData.title || "").toLowerCase();
+    const subtitle = (richData.subtitle || "").toLowerCase();
+    const type = (richData.type || "").toLowerCase();
+
+    // 1. Check Specific Packages first (which are royal rajasthan trail, alpine luxury express, etc)
+    if (title.includes("rajasthan") || subtitle.includes("rajasthan")) {
+      route = "/packages/pkg-1";
+    } else if (title.includes("alpine") || subtitle.includes("alpine")) {
+      route = "/packages/pkg-2";
+    } else if (title.includes("kyoto zen") || title.includes("tokyo neon") || subtitle.includes("kyoto") || subtitle.includes("tokyo")) {
+      // Prioritize pkg-3 for classic "Kyoto Zen & Tokyo Neon" package
+      if (title.includes("zen") || title.includes("neon")) {
+        route = "/packages/pkg-3";
+      } else {
+        route = "/tours/1"; // Default tour for Tokyo/Kyoto
+      }
+    }
+    // 2. Check general tour type
+    else if (type === "tour") {
+      if (title.includes("bali") || title.includes("batur") || subtitle.includes("bali") || subtitle.includes("batur")) {
+        route = "/tours/3";
+      } else if (title.includes("paris") || title.includes("seine") || title.includes("louvre") || subtitle.includes("paris")) {
+        route = "/tours/2";
+      } else if (title.includes("kyoto") || title.includes("fuji") || title.includes("shibuya") || subtitle.includes("tokyo")) {
+        route = "/tours/1";
+      } else {
+        route = "/destinations";
+      }
+    }
+    // 3. Check general restaurant type
+    else if (type === "restaurant") {
+      if (title.includes("locavore")) {
+        route = "/restaurants/rest-bali-locavore";
+      } else if (title.includes("nuri")) {
+        route = "/restaurants/rest-bali-nuri";
+      } else if (title.includes("jiro")) {
+        route = "/restaurants/rest-tokyo-jiro";
+      } else if (title.includes("ichiran")) {
+        route = "/restaurants/rest-tokyo-ichiran";
+      } else if (title.includes("ambroisie")) {
+        route = "/restaurants/rest-paris-ambroisie";
+      } else if (title.includes("creperie") || title.includes("breizh")) {
+        route = "/restaurants/rest-paris-creperie";
+      } else if (title.includes("bernardin")) {
+        route = "/restaurants/rest-ny-bernardin";
+      } else if (title.includes("katz")) {
+        route = "/restaurants/rest-ny-katz";
+      } else if (title.includes("peshawri")) {
+        route = "/restaurants/rest-india-peshawri";
+      } else if (title.includes("vrony")) {
+        route = "/restaurants/rest-swiss-vrony";
+      } else {
+        route = "/restaurants";
+      }
+    }
+    // 4. Check destinations
+    else if (type === "destination") {
+      if (title.includes("bali")) {
+        route = "/destinations/dest-bali";
+      } else if (title.includes("tokyo")) {
+        route = "/destinations/dest-tokyo";
+      } else if (title.includes("paris")) {
+        route = "/destinations/dest-paris";
+      } else if (title.includes("new york") || title.includes("ny")) {
+        route = "/destinations/dest-ny";
+      } else if (title.includes("india") || title.includes("rajasthan") || title.includes("mumbai")) {
+        route = "/destinations/dest-india";
+      } else if (title.includes("swiss") || title.includes("alps") || title.includes("switzerland")) {
+        route = "/destinations/dest-switzerland";
+      } else {
+        route = "/destinations";
+      }
+    }
+    // 5. Check bookings
+    else if (type === "booking") {
+      route = "/dashboard/bookings";
+    }
+    // 6. Check hotel (no specific details page so go to general /hotels listing)
+    else if (type === "hotel") {
+      route = "/hotels";
+    }
+    // 7. General link view or URL fallbacks
+    else if (richData.url) {
+      if (richData.url.startsWith("/hotels/")) {
+        route = "/hotels";
+      } else {
+        route = richData.url;
+      }
+    } else if (richData.linkView === "jets-cruises") {
+      route = "/jets";
+    } else if (richData.linkView === "journal") {
+      route = "/journal";
+    } else if (richData.linkView === "dashboard") {
+      route = "/dashboard";
+    } else {
+      route = "/destinations";
+    }
+
+    if (route) {
+      router.push(route);
+      setIsOpen(false);
+    }
+  };
+
+  if (!butlerEnabled) return null;
 
   return (
     <motion.div 
@@ -430,9 +713,9 @@ export default function ConciergeFAB({ activeView, setActiveView, onSyncData, us
                             </div>
                             <button
                               onClick={() => {
+                                handleExploreNow(msg.richData);
                                 if (msg.richData?.linkView) {
                                   setActiveView(msg.richData.linkView);
-                                  setIsOpen(false);
                                 }
                               }}
                               className={`px-3 py-1.5 text-white rounded-xl text-[10px] font-extrabold uppercase tracking-wider transition-all duration-200 cursor-pointer shadow-md active:scale-95 flex items-center gap-1 ${
@@ -494,51 +777,60 @@ export default function ConciergeFAB({ activeView, setActiveView, onSyncData, us
             </div>
 
             {/* Quick Suggestions Shelf */}
-            <div 
-              onPointerDown={(e) => e.stopPropagation()}
-              className="px-5 py-3.5 bg-gradient-to-r from-[#0b0512] via-[#10071a] to-[#0b0512] border-t border-white/5 flex gap-2 overflow-x-auto shrink-0 relative z-10 scrollbar-none"
-            >
-              <button
-                onClick={() => handleQuickQuestion("What are the top things to do in Bali?")}
-                className="text-[10px] font-extrabold bg-[#1d112d]/80 hover:bg-fuchsia-600/20 hover:text-white border border-fuchsia-500/20 text-slate-200 px-4 py-2.5 rounded-full whitespace-nowrap cursor-pointer transition-all duration-200 active:scale-95 shrink-0 uppercase tracking-wider shadow-[0_2px_8px_rgba(217,70,239,0.1)]"
+            {messages.length === 1 && (
+              <div 
+                onPointerDown={(e) => e.stopPropagation()}
+                className="px-5 py-3.5 bg-gradient-to-r from-[#0b0512] via-[#10071a] to-[#0b0512] border-t border-white/5 flex gap-2 overflow-x-auto shrink-0 relative z-10 scrollbar-none"
               >
-                🏝️ Bali Curations
-              </button>
-              <button
-                onClick={() => handleQuickQuestion("Tell me about the private jet options.")}
-                className="text-[10px] font-extrabold bg-[#1d112d]/80 hover:bg-fuchsia-600/20 hover:text-white border border-fuchsia-500/20 text-slate-200 px-4 py-2.5 rounded-full whitespace-nowrap cursor-pointer transition-all duration-200 active:scale-95 shrink-0 uppercase tracking-wider shadow-[0_2px_8px_rgba(217,70,239,0.1)]"
-              >
-                ✈️ Jet Charters
-              </button>
-              <button
-                onClick={() => handleQuickQuestion("What Michelin restaurants do we have in Paris?")}
-                className="text-[10px] font-extrabold bg-[#1d112d]/80 hover:bg-fuchsia-600/20 hover:text-white border border-fuchsia-500/20 text-slate-200 px-4 py-2.5 rounded-full whitespace-nowrap cursor-pointer transition-all duration-200 active:scale-95 shrink-0 uppercase tracking-wider shadow-[0_2px_8px_rgba(217,70,239,0.1)]"
-              >
-                🍽️ Paris Dining
-              </button>
-              <button
-                onClick={() => handleQuickQuestion("How does the privacy protection system work?")}
-                className="text-[10px] font-extrabold bg-[#1d112d]/80 hover:bg-fuchsia-600/20 hover:text-white border border-fuchsia-500/20 text-slate-200 px-4 py-2.5 rounded-full whitespace-nowrap cursor-pointer transition-all duration-200 active:scale-95 shrink-0 uppercase tracking-wider shadow-[0_2px_8px_rgba(217,70,239,0.1)]"
-              >
-                🔒 Privacy Protocol
-              </button>
-            </div>
+                <button
+                  onClick={() => handleQuickQuestion("What are the top things to do in Bali?")}
+                  className="text-[10px] font-extrabold bg-[#1d112d]/80 hover:bg-fuchsia-600/20 hover:text-white border border-fuchsia-500/20 text-slate-200 px-4 py-2.5 rounded-full whitespace-nowrap cursor-pointer transition-all duration-200 active:scale-95 shrink-0 uppercase tracking-wider shadow-[0_2px_8px_rgba(217,70,239,0.1)]"
+                >
+                  🏝️ Bali Curations
+                </button>
+                <button
+                  onClick={() => handleQuickQuestion("Tell me about the private jet options.")}
+                  className="text-[10px] font-extrabold bg-[#1d112d]/80 hover:bg-fuchsia-600/20 hover:text-white border border-fuchsia-500/20 text-slate-200 px-4 py-2.5 rounded-full whitespace-nowrap cursor-pointer transition-all duration-200 active:scale-95 shrink-0 uppercase tracking-wider shadow-[0_2px_8px_rgba(217,70,239,0.1)]"
+                >
+                  ✈️ Jet Charters
+                </button>
+                <button
+                  onClick={() => handleQuickQuestion("What Michelin restaurants do we have in Paris?")}
+                  className="text-[10px] font-extrabold bg-[#1d112d]/80 hover:bg-fuchsia-600/20 hover:text-white border border-fuchsia-500/20 text-slate-200 px-4 py-2.5 rounded-full whitespace-nowrap cursor-pointer transition-all duration-200 active:scale-95 shrink-0 uppercase tracking-wider shadow-[0_2px_8px_rgba(217,70,239,0.1)]"
+                >
+                  🍽️ Paris Dining
+                </button>
+                <button
+                  onClick={() => handleQuickQuestion("How does the privacy protection system work?")}
+                  className="text-[10px] font-extrabold bg-[#1d112d]/80 hover:bg-fuchsia-600/20 hover:text-white border border-fuchsia-500/20 text-slate-200 px-4 py-2.5 rounded-full whitespace-nowrap cursor-pointer transition-all duration-200 active:scale-95 shrink-0 uppercase tracking-wider shadow-[0_2px_8px_rgba(217,70,239,0.1)]"
+                >
+                  🔒 Privacy Protocol
+                </button>
+              </div>
+            )}
 
             {/* Input Form Box */}
             <form 
               onSubmit={handleFormSubmit} 
               onPointerDown={(e) => e.stopPropagation()}
-              className="p-4 border-t border-white/5 bg-[#0a0510]/95 flex gap-2.5 items-center shrink-0 relative z-10"
+              className="p-4 border-t border-white/5 bg-[#0a0510]/95 flex gap-2.5 items-end shrink-0 relative z-10"
             >
               <div className="flex-1 relative flex items-center">
-                <input
-                  type="text"
+                <textarea
+                  ref={textareaRef}
                   placeholder="Speak with your luxury butler..."
                   value={inputVal}
                   onChange={(e) => setInputVal(e.target.value)}
-                  className="w-full text-[13px] py-3.5 pl-4 pr-12 bg-[#140b1f] border border-fuchsia-500/20 text-white rounded-2xl focus:outline-none focus:border-fuchsia-500/50 focus:ring-1 focus:ring-fuchsia-500/20 font-medium placeholder-slate-500 transition-all duration-200"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleFormSubmit(e);
+                    }
+                  }}
+                  rows={1}
+                  className="w-full text-[13px] py-3.5 pl-4 pr-16 bg-[#140b1f] border border-fuchsia-500/20 text-white rounded-2xl focus:outline-none focus:border-fuchsia-500/50 focus:ring-1 focus:ring-fuchsia-500/20 font-medium placeholder-slate-500 transition-all duration-200 resize-none min-h-[44px] max-h-[140px] overflow-y-auto scrollbar-thin leading-relaxed"
                 />
-                <div className="absolute right-3 text-[9px] font-mono text-slate-600 flex items-center gap-1 select-none pointer-events-none">
+                <div className="absolute bottom-3 right-3 text-[9px] font-mono text-slate-600 flex items-center gap-1 select-none pointer-events-none">
                   <span className="border border-white/10 px-1.5 py-0.5 rounded bg-white/5">Enter</span>
                   <CornerDownLeft className="w-2.5 h-2.5" />
                 </div>
@@ -546,7 +838,7 @@ export default function ConciergeFAB({ activeView, setActiveView, onSyncData, us
               <button
                 type="submit"
                 disabled={!inputVal.trim() || isTyping}
-                className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-fuchsia-600 to-violet-600 hover:from-fuchsia-500 hover:to-violet-500 disabled:from-[#1b1524] disabled:to-[#1b1524] disabled:text-slate-600 text-white flex items-center justify-center transition-all duration-200 cursor-pointer shadow-lg shadow-fuchsia-500/20 active:scale-95"
+                className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-fuchsia-600 to-violet-600 hover:from-fuchsia-500 hover:to-violet-500 disabled:from-[#1b1524] disabled:to-[#1b1524] disabled:text-slate-600 text-white flex items-center justify-center transition-all duration-200 cursor-pointer shadow-lg shadow-fuchsia-500/20 active:scale-95 shrink-0"
               >
                 <Send className="w-4 h-4" />
               </button>

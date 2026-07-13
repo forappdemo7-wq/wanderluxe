@@ -1,6 +1,6 @@
 import express from 'express';
 import path from 'path';
-import { createServer as createViteServer } from 'vite';
+import next from 'next';
 import { GoogleGenAI, Type } from '@google/genai';
 import dotenv from 'dotenv';
 import helmet from 'helmet';
@@ -17,7 +17,7 @@ dotenv.config();
 // Configuration
 // ----------------------------------------------------------------------
 const config = {
-  port: process.env.PORT || 3001,
+  port: 3000,
   nodeEnv: process.env.NODE_ENV || 'development',
   geminiApiKey: process.env.GEMINI_API_KEY || '',
   isProduction: process.env.NODE_ENV === 'production',
@@ -29,7 +29,7 @@ const config = {
 const app = express();
 
 // Security & performance middleware
-app.use(helmet());
+app.use(helmet({ contentSecurityPolicy: false }));
 app.use(cors({ origin: '*' })); // Restrict in production
 app.use(compression());
 app.use(express.json({ limit: '10mb' }));
@@ -709,17 +709,18 @@ async function generateContentWithFallback(params: {
   if (!ai) throw new Error('Gemini not initialized');
   const primary = 'gemini-3.5-flash';
   const fallback = 'gemini-3.1-flash-lite';
+  const { model: _, ...restParams } = params;
   try {
     return await ai.models.generateContent({
       model: primary,
-      ...params,
+      ...restParams,
     });
   } catch (err) {
     console.warn(`[AI] Primary model failed, trying ${fallback}...`);
     try {
       return await ai.models.generateContent({
         model: fallback,
-        ...params,
+        ...restParams,
       });
     } catch (fallbackErr) {
       console.warn('[AI] Fallback also failed, switching to procedural.');
@@ -772,10 +773,70 @@ app.get('/api/hotels', (req, res, next) => {
 // Restaurants
 app.get('/api/restaurants', (req, res, next) => {
   try {
-    const { destId } = req.query;
-    const result = destId ? restaurants.filter(r => r.destinationId === destId) : restaurants;
+    const { destId, destinationId, cuisine, minRating, maxPriceLevel, sort } = req.query;
+    let result = [...restaurants];
+
+    const targetDestId = (destId || destinationId) as string | undefined;
+    if (targetDestId) {
+      result = result.filter(r => r.destinationId === targetDestId);
+    }
+
+    if (cuisine) {
+      const searchCuisine = (cuisine as string).toLowerCase();
+      result = result.filter(r => 
+        r.cuisine.toLowerCase().includes(searchCuisine) ||
+        r.name.toLowerCase().includes(searchCuisine)
+      );
+    }
+
+    if (minRating) {
+      result = result.filter(r => r.rating >= parseFloat(minRating as string));
+    }
+
+    if (maxPriceLevel) {
+      const levels = ['$', '$$', '$$$', '$$$$'];
+      const maxPriceIdx = parseInt(maxPriceLevel as string, 10);
+      result = result.filter((r) => levels.indexOf(r.priceLevel) <= maxPriceIdx);
+    }
+
+    if (sort) {
+      switch (sort as string) {
+        case 'rating':
+          result.sort((a, b) => b.rating - a.rating);
+          break;
+        case 'reviews':
+          result.sort((a, b) => b.reviewsCount - a.reviewsCount);
+          break;
+        case 'price-asc':
+          result.sort((a, b) => a.priceLevel.length - b.priceLevel.length);
+          break;
+        case 'price-desc':
+          result.sort((a, b) => b.priceLevel.length - a.priceLevel.length);
+          break;
+        case 'name':
+          result.sort((a, b) => a.name.localeCompare(b.name));
+          break;
+        default:
+          break;
+      }
+    }
+
     res.json(result);
-  } catch (err) { next(err); }
+  } catch (err) { 
+    next(err); 
+  }
+});
+
+app.get('/api/restaurants/:id', (req, res, next) => {
+  try {
+    const restaurant = restaurants.find(r => r.id === req.params.id);
+    if (!restaurant) {
+      return res.status(404).json({ error: 'Restaurant not found' });
+    }
+    res.json(restaurant);
+  } catch (err) { 
+    next(err); 
+  }
 });
 
 // Reviews
@@ -955,9 +1016,17 @@ User Message: "${message}"`;
             try {
               // Execute function (simplified inline to avoid duplication)
               switch (name) {
-                case 'getHotels': {
+                 case 'getHotels': {
                   const destId = args.destinationId;
-                  result = destId ? hotels.filter(h => h.destinationId === destId) : hotels;
+                  const promptLower = (formattedPrompt || "").toLowerCase();
+                  let matchedHotels = destId ? hotels.filter(h => h.destinationId === destId) : hotels;
+                  
+                  const found = matchedHotels.find(h => promptLower.includes(h.name.toLowerCase()) || h.name.toLowerCase().split(' ').some(word => word.length > 4 && promptLower.includes(word)));
+                  if (found) {
+                    matchedHotels = [found];
+                  }
+                  
+                  result = matchedHotels;
                   if (result.length) {
                     const first = result[0];
                     richData = {
@@ -974,7 +1043,15 @@ User Message: "${message}"`;
                 }
                 case 'getTours': {
                   const destId = args.destinationId;
-                  result = destId ? tours.filter(t => t.destinationId === destId) : tours;
+                  const promptLower = (formattedPrompt || "").toLowerCase();
+                  let matchedTours = destId ? tours.filter(t => t.destinationId === destId) : tours;
+                  
+                  const found = matchedTours.find(t => promptLower.includes(t.name.toLowerCase()) || t.name.toLowerCase().split(' ').some(word => word.length > 4 && promptLower.includes(word)));
+                  if (found) {
+                    matchedTours = [found];
+                  }
+                  
+                  result = matchedTours;
                   if (result.length) {
                     const first = result[0];
                     richData = {
@@ -983,7 +1060,7 @@ User Message: "${message}"`;
                       subtitle: first.description,
                       price: `$${first.pricePerPerson}/person`,
                       meta: `Duration: ${first.duration}`,
-                      url: `/tours/${first.id}`,
+                      url: first.id === 'tour-kyoto-neon' ? '/packages/pkg-3' : first.id === 'tour-rajasthan' ? '/packages/pkg-1' : first.id === 'tour-alpine' ? '/packages/pkg-2' : `/tours/${first.id}`,
                       linkView: 'tour-detail'
                     };
                   }
@@ -991,7 +1068,15 @@ User Message: "${message}"`;
                 }
                 case 'getRestaurants': {
                   const destId = args.destinationId;
-                  result = destId ? restaurants.filter(r => r.destinationId === destId) : restaurants;
+                  const promptLower = (formattedPrompt || "").toLowerCase();
+                  let matchedRestaurants = destId ? restaurants.filter(r => r.destinationId === destId) : restaurants;
+                  
+                  const found = matchedRestaurants.find(r => promptLower.includes(r.name.toLowerCase()) || r.name.toLowerCase().split(' ').some(word => word.length > 4 && promptLower.includes(word)));
+                  if (found) {
+                    matchedRestaurants = [found];
+                  }
+                  
+                  result = matchedRestaurants;
                   if (result.length) {
                     const first = result[0];
                     richData = {
@@ -1370,22 +1455,24 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 });
 
 // ----------------------------------------------------------------------
-// Vite / Static Serving
+// Next.js Custom Server
 // ----------------------------------------------------------------------
+const dev = config.nodeEnv !== 'production';
+const nextApp = next({ dev });
+const handle = nextApp.getRequestHandler();
+
 async function startServer() {
-  if (!config.isProduction) {
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: 'spa',
-    });
-    app.use(vite.middlewares);
-  } else {
-    const distPath = path.resolve(process.cwd(), 'dist');
-    app.use(express.static(distPath));
-    app.get('*', (req, res) => {
-      res.sendFile(path.join(distPath, 'index.html'));
-    });
-  }
+  console.log('[Next.js] Preparing application...');
+  await nextApp.prepare();
+  console.log('[Next.js] Application prepared.');
+
+  // Serve static files from public directory
+  app.use(express.static(path.join(process.cwd(), 'public')));
+
+  // Delegate all other routes to Next.js handler
+  app.all(/.*/, (req, res) => {
+    return handle(req, res);
+  });
 
   app.listen(config.port, '0.0.0.0', () => {
     console.log(`🚀 Server running on http://localhost:${config.port} (${config.nodeEnv})`);

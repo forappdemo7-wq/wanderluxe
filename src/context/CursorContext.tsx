@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 
 interface CursorContextType {
   butlerEnabled: boolean;
@@ -10,18 +10,28 @@ const CursorContext = createContext<CursorContextType | undefined>(undefined);
 export function CursorProvider({ children }: { children: React.ReactNode }) {
   const [butlerEnabled, setButlerEnabledState] = useState<boolean>(true);
 
-  useEffect(() => {
-    const saved = localStorage.getItem('wanderluxe_virtual_butler');
-    if (saved !== null) {
-      setButlerEnabledState(saved === 'true');
-    } else {
-      setButlerEnabledState(true);
+  React.useEffect(() => {
+    try {
+      if (typeof window !== 'undefined') {
+        const saved = localStorage.getItem('wanderluxe_virtual_butler');
+        if (saved !== null) {
+          setButlerEnabledState(saved === 'true');
+        }
+      }
+    } catch (e) {
+      console.warn("localStorage is not available:", e);
     }
   }, []);
 
   const setButlerEnabled = (enabled: boolean) => {
     setButlerEnabledState(enabled);
-    localStorage.setItem('wanderluxe_virtual_butler', String(enabled));
+    try {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('wanderluxe_virtual_butler', String(enabled));
+      }
+    } catch (e) {
+      console.warn("Failed to save to localStorage:", e);
+    }
   };
 
   return (

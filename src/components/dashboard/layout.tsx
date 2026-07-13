@@ -1,9 +1,10 @@
 "use client";
 
 import Sidebar from "@/components/dashboard/Sidebar";
-import Header from "@/components/Header";
+import Header from "@/components/dashboard/Header";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import { ArrowLeft } from "lucide-react";
 
 export default function DashboardLayout({
   children,
@@ -13,7 +14,7 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const router = useRouter();
 
-  const [points, setPoints] = useState(2450);
+  const [points] = useState(2450);
 
   const getTitle = () => {
     if (pathname.includes("bookings")) return "Bookings";
@@ -23,9 +24,13 @@ export default function DashboardLayout({
   };
 
   useEffect(() => {
-    const user = localStorage.getItem("user");
-    if (!user) router.push("/");
-  }, []);
+    try {
+      const user = localStorage.getItem("user");
+      if (!user) router.push("/");
+    } catch (e) {
+      console.warn("Failed to check user in dashboard layout:", e);
+    }
+  }, [router]);
 
   return (
     <div className="flex min-h-screen bg-zinc-950 text-white">
@@ -34,7 +39,22 @@ export default function DashboardLayout({
       <div className="flex-1 lg:ml-72 flex flex-col">
         {/* Top Bar */}
         <div className="h-20 border-b border-white/10 bg-zinc-900/70 backdrop-blur-2xl flex items-center px-8 z-40">
-          <div className="flex-1">
+          <div className="flex-1 flex items-center gap-3">
+            {/* Mobile / Tablet Back Button */}
+            <button
+              onClick={() => {
+                if (pathname === '/dashboard' || pathname === '/dashboard/') {
+                  router.push('/');
+                } else {
+                  router.push('/dashboard');
+                }
+              }}
+              className="lg:hidden flex items-center gap-2 px-3 py-2 rounded-xl bg-zinc-800/80 hover:bg-zinc-700/80 border border-white/10 text-xs font-bold uppercase tracking-wider text-zinc-300 transition-all cursor-pointer animate-fade-in"
+            >
+              <ArrowLeft size={14} />
+              <span>{pathname === '/dashboard' || pathname === '/dashboard/' ? 'Home' : 'Back'}</span>
+            </button>
+
             <h1 className="text-2xl font-black tracking-tighter">
               {getTitle()}
             </h1>

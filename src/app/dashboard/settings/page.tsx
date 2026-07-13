@@ -2,15 +2,14 @@
 
 import Link from 'next/link';
 import { 
-  User, 
   Lock, 
-  Bell, 
   Globe, 
   Shield, 
   ChevronRight, 
   Home, 
   Save,
-  Trash2 
+  Trash2,
+  Bell
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
@@ -55,7 +54,7 @@ export default function SettingsPage() {
             whileTap={{ scale: 0.98 }}
             onClick={handleSave}
             disabled={isSaving}
-            className="flex items-center gap-3 bg-white text-black px-10 py-4 rounded-2xl font-black uppercase tracking-widest text-sm hover:bg-blue-600 hover:text-white transition-all disabled:opacity-70"
+            className="flex items-center gap-3 bg-white text-black px-10 py-4 rounded-2xl font-black uppercase tracking-widest text-sm hover:bg-blue-600 hover:text-white transition-all disabled:opacity-70 cursor-pointer"
           >
             <Save size={18} />
             {isSaving ? "SAVING..." : "SAVE CHANGES"}
@@ -63,42 +62,6 @@ export default function SettingsPage() {
         </div>
 
         <div className="grid gap-8">
-          {/* Profile Section */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-zinc-900/70 border border-white/10 backdrop-blur-xl rounded-3xl p-10 space-y-8"
-          >
-            <div className="flex items-center gap-4 pb-6 border-b border-white/10">
-              <div className="p-3 bg-blue-500/10 rounded-2xl">
-                <User className="text-blue-400" size={28} />
-              </div>
-              <div>
-                <h2 className="text-2xl font-bold">Public Profile</h2>
-                <p className="text-zinc-400 text-sm">Information visible to other travelers</p>
-              </div>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-8">
-              <div className="space-y-3">
-                <label className="text-xs font-black uppercase tracking-widest text-zinc-500">FULL NAME</label>
-                <input 
-                  type="text" 
-                  defaultValue="Alex Rivera"
-                  className="w-full bg-zinc-800 border border-white/10 rounded-2xl px-6 py-4 text-lg font-medium focus:border-blue-500 outline-none transition-all"
-                />
-              </div>
-              <div className="space-y-3">
-                <label className="text-xs font-black uppercase tracking-widest text-zinc-500">EMAIL ADDRESS</label>
-                <input 
-                  type="email" 
-                  defaultValue="alex@wanderluxe.com"
-                  className="w-full bg-zinc-800 border border-white/10 rounded-2xl px-6 py-4 text-lg font-medium focus:border-blue-500 outline-none transition-all"
-                />
-              </div>
-            </div>
-          </motion.div>
-
           {/* Preferences & Security */}
           <div className="grid md:grid-cols-2 gap-8">
             {/* Preferences */}

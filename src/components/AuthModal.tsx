@@ -32,21 +32,44 @@ export default function AuthModal({
     setIsLoading(true);
     
     // Simulate API Call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     
-    console.log(`${view} attempt with:`, { email, password });
+    const loggedInUser = {
+      name: email ? email.split('@')[0].replace(/[^a-zA-Z0-9]/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : "George Harrison",
+      email: email,
+      points: 2450,
+      tier: "Vanguard Elite"
+    };
+    
+    try {
+      localStorage.setItem("user", JSON.stringify(loggedInUser));
+    } catch (e) {
+      console.warn("Failed to write user to localStorage in AuthModal:", e);
+    }
     setIsLoading(false);
     onClose();
+    window.location.href = "/dashboard";
   };
 
   const handleSocialLogin = (provider: string) => {
     setIsLoading(true);
     console.log(`Connecting to ${provider}...`);
-    // Logic for Google/NextAuth would go here
     setTimeout(() => {
+      const loggedInUser = {
+        name: "George Harrison",
+        email: "george@luxury.com",
+        points: 2450,
+        tier: "Vanguard Elite"
+      };
+      try {
+        localStorage.setItem("user", JSON.stringify(loggedInUser));
+      } catch (e) {
+        console.warn("Failed to write user to localStorage in AuthModal social login:", e);
+      }
       setIsLoading(false);
       onClose();
-    }, 1000);
+      window.location.href = "/dashboard";
+    }, 800);
   };
 
   return (
@@ -164,7 +187,7 @@ export default function AuthModal({
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="alex@luxury.com"
-                        className="w-full bg-white/5 border border-white/10 rounded-2xl h-14 px-6 text-white placeholder:text-gray-700 focus:outline-none focus:border-blue-500/50 transition-all"
+                        className="w-full bg-white/5 border border-white/10 rounded-2xl h-14 px-6 text-white placeholder:text-white/40 focus:outline-none focus:border-blue-500/50 transition-all"
                       />
                     </div>
                     <div>
@@ -177,7 +200,7 @@ export default function AuthModal({
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="••••••••"
-                        className="w-full bg-white/5 border border-white/10 rounded-2xl h-14 px-6 text-white placeholder:text-gray-700 focus:outline-none focus:border-blue-500/50 transition-all"
+                        className="w-full bg-white/5 border border-white/10 rounded-2xl h-14 px-6 text-white placeholder:text-white/40 focus:outline-none focus:border-blue-500/50 transition-all"
                       />
                     </div>
                     

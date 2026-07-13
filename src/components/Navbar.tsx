@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCurrency, type Currency } from "@/context/CurrencyContext";
 import { useCursor } from "@/context/CursorContext";
-import { ChevronDown, Globe, Menu, X, Bot, Sparkles } from 'lucide-react';
+import { ChevronDown, Globe, Menu, X, Bot, LayoutDashboard, LogOut, User, Settings } from 'lucide-react';
 import AuthModal from "./AuthModal";
 
 // Currency symbols for better UX
@@ -28,8 +28,52 @@ export default function Navbar() {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const profileRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => setMounted(true), []);
+  const [user, setUser] = useState<{ name: string; email: string; avatar?: string } | null>(null);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+        setIsProfileOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const loadUser = () => {
+    try {
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        try {
+          setUser(JSON.parse(storedUser));
+        } catch {
+          setUser(null);
+        }
+      } else {
+        setUser(null);
+      }
+    } catch (e) {
+      console.warn("Failed to read user from localStorage in Navbar:", e);
+    }
+  };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setMounted(true);
+      loadUser();
+    }, 0);
+
+    window.addEventListener("userUpdate", loadUser);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("userUpdate", loadUser);
+    };
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -66,7 +110,6 @@ export default function Navbar() {
     { name: "Experiences", href: "/experience" },
     { name: "Journal", href: "/journal" },
     { name: "Dining", href: "/restaurants" },
-    { name: "Dashboard", href: "/dashboard" },
   ];
 
   const isActive = (href: string) => {
@@ -209,12 +252,135 @@ export default function Navbar() {
             </div>
 
             {/* AUTH */}
-            <button
-              onClick={() => setIsAuthOpen(true)}
-              className="bg-gradient-to-r from-gray-900 to-gray-800 dark:from-white dark:to-gray-100 text-white dark:text-black px-6 py-2.5 rounded-xl font-black text-[11px] uppercase tracking-widest hover:from-blue-600 hover:to-blue-700 dark:hover:from-blue-500 dark:hover:to-blue-600 hover:text-white dark:hover:text-white transition-all duration-300 shadow-lg hover:shadow-blue-500/25 whitespace-nowrap"
-            >
-              Sign Up
-            </button>
+            {user ? (
+              <div className="relative" ref={profileRef}>
+                <button
+                  onClick={() => setIsProfileOpen(!isProfileOpen)}
+                  className="flex items-center gap-3.5 pl-3.5 pr-2 py-1.5 rounded-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 hover:border-gray-300 dark:hover:border-white/20 transition-all cursor-pointer select-none"
+                >
+                  <div className="flex flex-col text-right hidden xl:block">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-gray-900 dark:text-white leading-none">
+                      {user.name}
+                    </span>
+                    <span className="text-[8px] font-bold text-amber-500 dark:text-amber-400 tracking-widest uppercase mt-1 leading-none">
+                      Vanguard Elite
+                    </span>
+                  </div>
+                  <div className="w-9 h-9 rounded-full overflow-hidden border-2 border-amber-500/30 shadow-inner bg-gradient-to-tr from-amber-500/20 to-blue-500/20 flex items-center justify-center">
+                    <img 
+                      src={user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}`} 
+                      alt="Profile Avatar"
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}`;
+                      }}
+                    />
+                  </div>
+                  <ChevronDown
+                    size={14}
+                    className={`text-gray-500 transition-transform duration-300 ${isProfileOpen ? "rotate-180" : ""}`}
+                  />
+                </button>
+
+                {isProfileOpen && (
+                  <div className="absolute top-full mt-2.5 right-0 w-72 bg-white dark:bg-zinc-950 border border-gray-100 dark:border-zinc-800/80 rounded-3xl shadow-2xl p-4 z-50 animate-in fade-in zoom-in-95 duration-200">
+                    {/* Header profile info */}
+                    <div className="flex items-center gap-3 pb-3 mb-3 border-b border-gray-100 dark:border-zinc-800/80">
+                      <div className="w-12 h-12 rounded-2xl overflow-hidden bg-zinc-100 dark:bg-zinc-900 border border-black/5 dark:border-white/10">
+                        <img 
+                          src={user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}`} 
+                          alt="Avatar" 
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}`;
+                          }}
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-black text-gray-900 dark:text-white truncate tracking-tight">{user.name}</p>
+                        <p className="text-[10px] font-bold text-gray-500 dark:text-zinc-500 truncate leading-none mt-0.5">{user.email || 'george@luxury.com'}</p>
+                        <div className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-amber-500/10 rounded-full mt-1.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                          <span className="text-[9px] font-black uppercase tracking-wider text-amber-500">Vanguard Elite</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Links */}
+                    <div className="space-y-1">
+                      <Link
+                        href="/dashboard"
+                        onClick={() => setIsProfileOpen(false)}
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-zinc-50 dark:hover:bg-zinc-900/60 transition-all text-gray-700 dark:text-zinc-300 group"
+                      >
+                        <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500 group-hover:scale-105 transition-transform">
+                          <LayoutDashboard size={15} />
+                        </div>
+                        <div className="flex-1 text-left">
+                          <p className="text-xs font-black uppercase tracking-widest text-gray-900 dark:text-white">Dashboard</p>
+                          <p className="text-[9px] text-gray-400 dark:text-zinc-500 font-bold leading-none mt-0.5">Private Flight & Stay Manifests</p>
+                        </div>
+                      </Link>
+
+                      <Link
+                        href="/dashboard/profile"
+                        onClick={() => setIsProfileOpen(false)}
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-zinc-50 dark:hover:bg-zinc-900/60 transition-all text-gray-700 dark:text-zinc-300 group"
+                      >
+                        <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-500 group-hover:scale-105 transition-transform">
+                          <User size={15} />
+                        </div>
+                        <div className="flex-1 text-left">
+                          <p className="text-xs font-black uppercase tracking-widest text-gray-900 dark:text-white">My Profile</p>
+                          <p className="text-[9px] text-gray-400 dark:text-zinc-500 font-bold leading-none mt-0.5">Manage Member Details & Photo</p>
+                        </div>
+                      </Link>
+
+                      <Link
+                        href="/dashboard/settings"
+                        onClick={() => setIsProfileOpen(false)}
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-zinc-50 dark:hover:bg-zinc-900/60 transition-all text-gray-700 dark:text-zinc-300 group"
+                      >
+                        <div className="w-8 h-8 rounded-lg bg-zinc-500/10 flex items-center justify-center text-zinc-500 group-hover:scale-105 transition-transform">
+                          <Settings size={15} />
+                        </div>
+                        <div className="flex-1 text-left">
+                          <p className="text-xs font-black uppercase tracking-widest text-gray-900 dark:text-white">Account Settings</p>
+                          <p className="text-[9px] text-gray-400 dark:text-zinc-500 font-bold leading-none mt-0.5">Manage Notifications & Security</p>
+                        </div>
+                      </Link>
+                    </div>
+
+                    <div className="h-px bg-gray-100 dark:bg-zinc-800/80 my-3" />
+
+                    {/* Logout */}
+                    <button
+                      onClick={() => {
+                        try {
+                          localStorage.removeItem("user");
+                        } catch (e) {
+                          console.warn("Failed to remove user from localStorage:", e);
+                        }
+                        setUser(null);
+                        setIsProfileOpen(false);
+                        window.location.reload();
+                      }}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-red-600 dark:text-red-400 hover:bg-red-500/5 dark:hover:bg-red-500/10 transition-all cursor-pointer font-black text-xs uppercase tracking-widest"
+                    >
+                      <LogOut size={15} />
+                      <span>Sign Out</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <button
+                onClick={() => setIsAuthOpen(true)}
+                className="bg-gradient-to-r from-gray-900 to-gray-800 dark:from-white dark:to-gray-100 text-white dark:text-black px-6 py-2.5 rounded-xl font-black text-[11px] uppercase tracking-widest hover:from-blue-600 hover:to-blue-700 dark:hover:from-blue-500 dark:hover:to-blue-600 hover:text-white dark:hover:text-white transition-all duration-300 shadow-lg hover:shadow-blue-500/25 whitespace-nowrap cursor-pointer"
+              >
+                Sign Up
+              </button>
+            )}
           </div>
 
           {/* MOBILE HAMBURGER */}
@@ -334,16 +500,104 @@ export default function Navbar() {
               </button>
             </div>
 
-            {/* Auth Button (Mobile) */}
-            <button
-              onClick={() => {
-                setIsAuthOpen(true);
-                setIsMobileMenuOpen(false);
-              }}
-              className="bg-gradient-to-r from-gray-900 to-gray-800 dark:from-white dark:to-gray-100 text-white dark:text-black px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-widest hover:from-blue-600 hover:to-blue-700 dark:hover:from-blue-500 dark:hover:to-blue-600 hover:text-white transition-all duration-300 text-center shadow-lg"
-            >
-              Sign Up
-            </button>
+            {/* Auth/Profile Section (Mobile) */}
+            {user ? (
+              <div className="flex flex-col gap-4 bg-zinc-50 dark:bg-zinc-900/60 p-6 rounded-3xl border border-gray-100 dark:border-zinc-800/80">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-2xl overflow-hidden bg-zinc-200 dark:bg-zinc-800 border border-black/5 dark:border-white/10">
+                    <img 
+                      src={user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}`} 
+                      alt="Avatar" 
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}`;
+                      }}
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0 text-left">
+                    <p className="text-sm font-black text-gray-900 dark:text-white truncate tracking-tight">{user.name}</p>
+                    <div className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-amber-500/10 rounded-full mt-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                      <span className="text-[9px] font-black uppercase tracking-wider text-amber-500">Vanguard Elite</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="h-px bg-gray-200 dark:bg-zinc-800/80 my-2" />
+
+                <div className="text-left space-y-2">
+                  <Link
+                    href="/dashboard"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center gap-3 p-3 rounded-2xl bg-white dark:bg-zinc-950/40 hover:bg-white dark:hover:bg-zinc-950/80 transition-all border border-black/5 dark:border-white/5"
+                  >
+                    <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500">
+                      <LayoutDashboard size={14} />
+                    </div>
+                    <div>
+                      <p className="text-xs font-black uppercase tracking-widest text-gray-900 dark:text-zinc-200">Dashboard</p>
+                      <p className="text-[9px] text-gray-400 dark:text-zinc-500 font-bold leading-none mt-0.5">Private Flight & Stay Manifests</p>
+                    </div>
+                  </Link>
+
+                  <Link
+                    href="/dashboard/profile"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center gap-3 p-3 rounded-2xl bg-white dark:bg-zinc-950/40 hover:bg-white dark:hover:bg-zinc-950/80 transition-all border border-black/5 dark:border-white/5"
+                  >
+                    <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-500">
+                      <User size={14} />
+                    </div>
+                    <div>
+                      <p className="text-xs font-black uppercase tracking-widest text-gray-900 dark:text-zinc-200">My Profile</p>
+                      <p className="text-[9px] text-gray-400 dark:text-zinc-500 font-bold leading-none mt-0.5">Manage Member Details & Photo</p>
+                    </div>
+                  </Link>
+
+                  <Link
+                    href="/dashboard/settings"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center gap-3 p-3 rounded-2xl bg-white dark:bg-zinc-950/40 hover:bg-white dark:hover:bg-zinc-950/80 transition-all border border-black/5 dark:border-white/5"
+                  >
+                    <div className="w-8 h-8 rounded-lg bg-zinc-500/10 flex items-center justify-center text-zinc-500">
+                      <Settings size={14} />
+                    </div>
+                    <div>
+                      <p className="text-xs font-black uppercase tracking-widest text-gray-900 dark:text-zinc-200">Account Settings</p>
+                      <p className="text-[9px] text-gray-400 dark:text-zinc-500 font-bold leading-none mt-0.5">Manage Notifications & Security</p>
+                    </div>
+                  </Link>
+                </div>
+
+                <div className="h-px bg-gray-200 dark:bg-zinc-800/80 my-1" />
+
+                <button
+                  onClick={() => {
+                    try {
+                      localStorage.removeItem("user");
+                    } catch (e) {
+                      console.warn("Failed to remove user from localStorage:", e);
+                    }
+                    setUser(null);
+                    setIsMobileMenuOpen(false);
+                    window.location.reload();
+                  }}
+                  className="w-full bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/10 py-3 rounded-2xl font-black text-xs uppercase tracking-widest text-center cursor-pointer"
+                >
+                  Sign Out
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => {
+                  setIsAuthOpen(true);
+                  setIsMobileMenuOpen(false);
+                }}
+                className="bg-gradient-to-r from-gray-900 to-gray-800 dark:from-white dark:to-gray-100 text-white dark:text-black px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-widest hover:from-blue-600 hover:to-blue-700 dark:hover:from-blue-500 dark:hover:to-blue-600 hover:text-white transition-all duration-300 text-center shadow-lg cursor-pointer"
+              >
+                Sign Up
+              </button>
+            )}
           </div>
         </div>
       )}
