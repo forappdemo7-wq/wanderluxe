@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import Sidebar from '@/components/dashboard/Sidebar';
 import { useCurrency, type Currency } from '@/context/CurrencyContext';
 import { Globe, ChevronDown, Mail, Key, LogIn, Sparkles, ArrowLeft } from 'lucide-react';
@@ -55,7 +55,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   // Helper because usePathname might be from app router
   function usePathnameSafe() {
     try {
-      return require('next/navigation').usePathname();
+      return usePathname();
     } catch {
       return '/dashboard';
     }

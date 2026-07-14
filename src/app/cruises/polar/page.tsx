@@ -192,7 +192,10 @@ export default function PolarCruisePage() {
   const heroOpacity = useTransform(scrollYProgress, [0, 0.35], [1, 0]);
 
   useEffect(() => {
-    setMounted(true);
+    const timer = setTimeout(() => {
+      setMounted(true);
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleBookingSubmit = (e: React.FormEvent) => {
@@ -270,7 +273,7 @@ export default function PolarCruisePage() {
           </h1>
 
           <p className="text-lg md:text-xl text-cyan-100/70 max-w-2xl mx-auto leading-relaxed mb-12">
-            12 days of absolute silence, towering tabular icebergs, and incredible wildlife encounters aboard the world's most sophisticated luxury ice-class vessel.
+            12 days of absolute silence, towering tabular icebergs, and incredible wildlife encounters aboard the world&apos;s most sophisticated luxury ice-class vessel.
           </p>
 
           {/* Captain Statistics */}
@@ -678,7 +681,7 @@ export default function PolarCruisePage() {
                         >
                           <option value="explorer">Explorer Veranda Suite</option>
                           <option value="horizon">Grand Horizon Penthouse</option>
-                          <option value="presidential">Owner's Presidential Suite</option>
+                          <option value="presidential">Owner&apos;s Presidential Suite</option>
                         </select>
                       </div>
                     </div>

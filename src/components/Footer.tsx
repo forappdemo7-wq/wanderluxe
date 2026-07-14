@@ -48,7 +48,7 @@ export default function Footer() {
               <Diamond className="h-6 w-6 text-blue-500 fill-blue-500/20 group-hover:rotate-12 transition-transform" />
             </Link>
             <p className="text-gray-400 text-lg leading-relaxed max-w-md font-light">
-              Designing unparalleled journeys for the world's most discerning travelers. 
+              Designing unparalleled journeys for the world&apos;s most discerning travelers. 
               Your gateway to the extraordinary.
             </p>
             <div className="flex gap-5">

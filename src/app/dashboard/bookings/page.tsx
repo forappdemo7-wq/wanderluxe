@@ -60,7 +60,9 @@ export default function BookingsPage() {
   };
 
   useEffect(() => {
-    fetchBookings();
+    const timer = setTimeout(() => {
+      fetchBookings();
+    }, 0);
 
     const handleSync = () => {
       fetchBookings();
@@ -68,6 +70,7 @@ export default function BookingsPage() {
 
     window.addEventListener("bookingsUpdate", handleSync);
     return () => {
+      clearTimeout(timer);
       window.removeEventListener("bookingsUpdate", handleSync);
     };
   }, []);

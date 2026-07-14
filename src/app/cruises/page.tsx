@@ -227,7 +227,7 @@ export default function CruisesPage() {
             transition={{ delay: 0.2 }}
             className="text-gray-400 text-lg md:text-xl font-medium leading-relaxed"
           >
-            Meticulously planned maritime journeys across the world's most remote polar caps, pristine private yacht passages, and timeless historic rivers.
+            Meticulously planned maritime journeys across the world&apos;s most remote polar caps, pristine private yacht passages, and timeless historic rivers.
           </motion.p>
         </div>
 
@@ -242,7 +242,7 @@ export default function CruisesPage() {
             ].map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
+                onClick={() => setActiveTab(tab.id as 'all' | 'polar' | 'tropical' | 'cultural')}
                 className={`px-6 py-3.5 rounded-xl md:rounded-full text-xs font-black uppercase tracking-widest flex items-center gap-2 transition-all duration-350 ${
                   activeTab === tab.id 
                     ? 'bg-blue-600 text-white shadow-[0_8px_20px_rgba(37,99,235,0.4)]' 
@@ -525,7 +525,7 @@ export default function CruisesPage() {
                           >
                             <option value="standard">Horizon Suite - Base Fare</option>
                             <option value="master">Grand Veranda Master (+ $4,500)</option>
-                            <option value="royal">Owner's Penthouse Suite (+ $12,000)</option>
+                            <option value="royal">Owner&apos;s Penthouse Suite (+ $12,000)</option>
                           </select>
                         </div>
 

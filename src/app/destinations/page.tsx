@@ -63,8 +63,15 @@ export default function DestinationsPage() {
 
   // 3. Persistent Favorites
   useEffect(() => {
-    const stored = localStorage.getItem("favorites");
-    if (stored) setFavorites(new Set(JSON.parse(stored)));
+    const timer = setTimeout(() => {
+      try {
+        const stored = localStorage.getItem("favorites");
+        if (stored) setFavorites(new Set(JSON.parse(stored)));
+      } catch (e) {
+        console.warn("Failed to read favorites from localStorage:", e);
+      }
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const toggleFavorite = useCallback((e: React.MouseEvent, id: string) => {
@@ -74,7 +81,11 @@ export default function DestinationsPage() {
       const newSet = new Set(prev);
       if (newSet.has(id)) newSet.delete(id);
       else newSet.add(id);
-      localStorage.setItem("favorites", JSON.stringify(Array.from(newSet)));
+      try {
+        localStorage.setItem("favorites", JSON.stringify(Array.from(newSet)));
+      } catch (err) {
+        console.warn("Failed to save favorites to localStorage:", err);
+      }
       return newSet;
     });
   }, []);
@@ -286,7 +297,7 @@ export default function DestinationsPage() {
               <X size={40} className="text-zinc-700" />
             </div>
             <h2 className="text-4xl font-black tracking-tighter mb-4">No Destinations Found</h2>
-            <p className="text-zinc-500 max-w-sm mx-auto mb-10">We couldn't find any stays matching your current search or filter criteria.</p>
+            <p className="text-zinc-500 max-w-sm mx-auto mb-10">We couldn&apos;t find any stays matching your current search or filter criteria.</p>
             <button 
               onClick={() => { setQuery(""); setFilterType("all"); }}
               className="px-8 py-4 bg-white text-black font-black rounded-2xl hover:bg-blue-500 hover:text-white transition-all"

@@ -535,6 +535,121 @@ const restaurants: Restaurant[] = [
   }
 ];
 
+// ----------------------------------------------------------------------
+// Cruises & Charters Database
+// ----------------------------------------------------------------------
+interface CruiseOrCharter {
+  id: string;
+  type: 'cruise' | 'jet' | 'yacht' | 'estate';
+  name: string;
+  description: string;
+  destination?: string;
+  price: string;
+  duration?: string;
+  vessel?: string;
+  embarkation?: string;
+  route?: string;
+  capacity?: string;
+  activities?: string[];
+  highlights?: string[];
+  amenities?: string[];
+}
+
+const cruisesAndCharters: CruiseOrCharter[] = [
+  {
+    id: "polar-expedition",
+    type: "cruise",
+    name: "The Polar Expedition",
+    description: "An extraordinary journey through dramatic glacial channels, towering icebergs, and pristine polar wilderness. Sail on the reinforced PC6 polar vessel MV Magellan Explorer.",
+    destination: "Antarctica & Arctic",
+    price: "$8,500/person",
+    duration: "12 Days",
+    vessel: "MV Magellan Explorer",
+    embarkation: "Ushuaia, Argentina",
+    route: "Ushuaia → Drake Passage → Antarctic Peninsula → South Shetland Islands",
+    activities: ["Zodiac shore landings", "Helicopter polar scouting", "Penguin colony walks", "Marine biology science presentations", "Optional Polar Plunge challenge"],
+    highlights: ["Interactive marine life spotting", "Up-close glacier fjord cruises", "Glaciology expert lectures"]
+  },
+  {
+    id: "mediterranean-charter",
+    type: "cruise",
+    name: "Mediterranean Ultra-Luxe Cruise",
+    description: "An ultra-exclusive mega yacht voyage sailing through the sparkling waters of the French Riviera, Amalfi Coast, and Cyclades islands.",
+    destination: "Monaco, Italy & Greece",
+    price: "$12,400/person",
+    duration: "9 Days",
+    vessel: "The Solaris II Mega Yacht",
+    embarkation: "Naples, Italy",
+    route: "Monaco → Amalfi Coast → Aeolian Islands → Cyclades & Santorini → Mykonos",
+    activities: ["Stern folding beach club access", "Onboard thermal spa & hot stone sauna", "Michelin-starred culinary tastings", "Private tender excursions to secluded coves"],
+    highlights: ["Sunset Champagne on helideck", "VIP beach club access", "Tailored shore experiences"]
+  },
+  {
+    id: "nile-sanctuary",
+    type: "cruise",
+    name: "Nile Royal Sanctuary",
+    description: "A majestic river sailing in Egypt aboard a traditional, opulent Dahabiya boat, discovering thousands of years of pharaonic history.",
+    destination: "Egypt (Luxor to Aswan)",
+    price: "$6,800/person",
+    duration: "8 Days",
+    vessel: "The Dahabiya Cleopatra",
+    embarkation: "Luxor, Egypt",
+    route: "Luxor → Esna → Edfu → Kom Ombo → Aswan",
+    activities: ["Private Egyptologist-guided temple visits", "Starlight dining next to historic ruins", "Traditional sunset felucca sailing", "Local organic culinary experiences"],
+    highlights: ["Valley of the Kings private access", "Kom Ombo moonlit temple tour", "Aswan traditional Nubian musical evening"]
+  },
+  {
+    id: "south-pacific-atolls",
+    type: "cruise",
+    name: "South Pacific Atoll Explorer",
+    description: "A luxury multi-hull catamaran voyage navigating the pristine turquoise lagoons, coral atolls, and volcanic peaks of French Polynesia and Fiji.",
+    destination: "Fiji, Tonga & French Polynesia",
+    price: "$9,950/person",
+    duration: "14 Days",
+    vessel: "Le Pacific Wind Catamaran",
+    embarkation: "Papeete, Tahiti",
+    route: "Tahiti → Moorea → Bora Bora → Tuamotu Archipelago → Marquesas Wild Peaks → Return",
+    activities: ["PADI master-guided reef diving", "Overwater glass-floor suite lodging", "Private uninhabited island beach barbecues", "Traditional Polynesian sailing canoe trips"],
+    highlights: ["Snorkeling with manta rays", "Bespoke vanilla farm tours", "Overwater starlight cinema"]
+  },
+  {
+    id: "jet-g650",
+    type: "jet",
+    name: "Gulfstream G650ER Heavy Jet",
+    description: "The absolute pinnacle of business aviation. Boasts a maximum range of 7,500 nautical miles, whisper-quiet cabin acoustics, and modular sleeping berths.",
+    capacity: "Up to 16 passengers",
+    price: "$12,000/hr",
+    amenities: ["🍷 Curated caviar & vintage tasting bar", "🛏️ Custom hand-stitched leather master stateroom", "🌐 Ka-Band high-speed orbital satellite Wi-Fi", "👤 Onboard personal flight coordinator"]
+  },
+  {
+    id: "jet-global7500",
+    type: "jet",
+    name: "Bombardier Global 7500 Ultra Jet",
+    description: "Featuring four distinct living zones, a full-size kitchen, and specialized ergonomic crew suites designed to alleviate long-distance travel fatigue.",
+    capacity: "Up to 19 passengers",
+    price: "$14,500/hr",
+    amenities: ["🍽️ Michelin-level dynamic gourmet kitchen", "🛁 En-suite shower & premium French body lotions", "🛋️ Nuage zero-gravity lounge chairs", "🔇 Advanced sound suppression insulation"]
+  },
+  {
+    id: "yacht-solaris",
+    type: "yacht",
+    name: "The Solaris 120m Mega Yacht",
+    description: "A bespoke steel-hulled visual masterpiece featuring a dual helipad network, fully glass-backed swimming pool, and custom onboard beach club.",
+    capacity: "Up to 36 guests",
+    price: "$28,000/hr",
+    amenities: ["🚁 Dual heli-decks for rapid arrival", "🏊 Glass-bottom thermal pool & sauna complex", "🌊 Custom water sports garage with jet skis", "🥂 40-member specialized elite hospitality crew"]
+  },
+  {
+    id: "island-necker",
+    type: "estate",
+    name: "Necker Island Private Island Retreat",
+    description: "Located in the stunning Caribbean, offering complete isolation, crystal coral lagoons, and customized luxury thatched Balinese-style villas.",
+    capacity: "Exclusive buyouts only",
+    price: "$105,000/night",
+    amenities: ["🌴 Complete 74-acre private island access", "⛵ Catamaran charters and deep reef dive gear", "🍽️ All-inclusive gourmet dining & open bar", "🎾 Personalized professional tennis coaches"]
+  }
+];
+
 const reviews: Review[] = [
   {
     id: 'rev-1',
@@ -703,27 +818,32 @@ if (config.geminiApiKey) {
 
 async function generateContentWithFallback(params: {
   model: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   contents: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   config?: any;
-}): Promise<any> {
+}): Promise<{ text?: string; functionCalls?: unknown[] }> {
   if (!ai) throw new Error('Gemini not initialized');
   const primary = 'gemini-3.5-flash';
   const fallback = 'gemini-3.1-flash-lite';
   const { model: _, ...restParams } = params;
   try {
-    return await ai.models.generateContent({
+    const res = await ai.models.generateContent({
       model: primary,
       ...restParams,
     });
+    return res as { text?: string; functionCalls?: unknown[] };
   } catch (err) {
-    console.warn(`[AI] Primary model failed, trying ${fallback}...`);
+    console.log(`[AI] Primary model transition to fallback (Info: ${err instanceof Error ? err.message : String(err)})`);
     try {
-      return await ai.models.generateContent({
+      console.log(`[AI] Querying fallback model ${fallback}...`);
+      const res = await ai.models.generateContent({
         model: fallback,
         ...restParams,
       });
+      return res as { text?: string; functionCalls?: unknown[] };
     } catch (fallbackErr) {
-      console.warn('[AI] Fallback also failed, switching to procedural.');
+      console.log(`[AI] Fallback transition completed (Info: ${fallbackErr instanceof Error ? fallbackErr.message : String(fallbackErr)})`);
       throw fallbackErr;
     }
   }
@@ -918,34 +1038,54 @@ app.post('/api/chat', validate(chatSchema), async (req, res, next) => {
       ? `- Active user ${user.name} (Email: ${user.email}) holds '${user.tier}' status with ${user.points?.toLocaleString() || 0} reward points. Address them by name.`
       : `- Anonymous Guest. Address as "Esteemed Guest" or "Valued Guest". Encourage sign-up.`;
 
-    const systemInstruction = `You are "Wanderluxe ai helper", a highly knowledgeable, friendly, and professional digital Travel Concierge. Your goal is to help users discover, plan, and book the perfect trip. You specialize in matching users with the best hotels, restaurants, and tourist attractions based on their preferences.
+    const systemInstruction = `You are "Wanderluxe ai helper", a highly knowledgeable, friendly, and professional digital Travel Concierge. Your goal is to help users discover, plan, and book the perfect trip. You specialize in matching users with the best hotels, restaurants, tourist attractions, ultra-luxury cruises (such as The Polar Expedition, Mediterranean Ultra-Luxe, Nile Royal Sanctuary, and South Pacific Atoll Explorer), and private air/sea charters (jets, yachts, and private estates) based on their preferences.
 
 Response Guidelines & Tone:
 1. Conversational & Welcoming: Speak with the enthusiasm and warmth of a professional local tour guide.
-2. Structured & Scannable: Use markdown, bullet points, and bold text to present itineraries, hotel options, or food menus.
+2. Structured & Scannable: Use markdown, bullet points, and bold text to present itineraries, hotel options, food menus, cruises, or charters.
 3. Transparent: Always clearly state prices, ratings, and locations if available.
 4. Action-Oriented: Encourage next steps.
 
 Contextual Awareness:
 - You have live tools to fetch hotels, tours, restaurants, and user bookings, and even perform/cancel bookings. Always prefer using tools to fetch or modify data when needed.
-- NEVER invent prices, availability, or ratings that are not present in the live database.
+- You have complete knowledge of our private aviation fleet, superyachts, private estates, and luxury cruises. Speak about them with high prestige and deep detail.
+- NEVER invent prices, availability, or ratings that are not present in the live database or specified catalogs.
 
 Policies & Discretion:
 - Privacy: We keep all traveler manifests and flight logs stored in fully encrypted isolated cloud databases.
 - Cancellations: Private air charters must be logged 48 hours prior to runway taxi.
-- Currency: We support multiple currencies dynamically: USD ($), EUR (€), JPY (¥), GBP (£), and INR (₹).
+- Currency & Exchange Rates: We support multiple currencies dynamically based on USD ($) base rate. Always use these exact conversion rates in your replies and calculations:
+  * USD ($): 1.0
+  * EUR (€): 0.92
+  * GBP (£): 0.78
+  * JPY (¥): 155.0
+  * INR (₹): 96.5 (For example, $4,500 USD is exactly ₹4,34,250 INR per person)
 - Security: All flights and yachts are staffed by certified crews.
 
 Member Status:
 ${memberStatusText}
 
-Supported destinations: Bali (Indonesia), Tokyo (Japan), Paris (France), New York City (US), Rajasthan & Mumbai (India), Swiss Alps (Switzerland). You can book any tour/hotel/restaurant shown on our home screen.`;
+Supported destinations: Bali (Indonesia), Tokyo (Japan), Paris (France), New York City (US), Rajasthan & Mumbai (India), Swiss Alps (Switzerland), Antarctica & Arctic (The Polar Expedition), Mediterranean (Amalfi & Cyclades), Nile River (Egypt), South Pacific Atolls (Tahiti/Fiji). You can book any tour/hotel/restaurant shown on our home screen, or inquiries about cruises and private jets.`;
 
     // Build context index (compact)
     const hotelsContext = hotels.map(h => `- Hotel: ${h.name} (ID: "${h.id}", Destination: "${h.destinationId}", Price: $${h.pricePerNight}/night)`).join('\n');
     const restaurantsContext = restaurants.map(r => `- Restaurant: ${r.name} (ID: "${r.id}", Destination: "${r.destinationId}", Cuisine: "${r.cuisine}")`).join('\n');
     const toursContext = tours.map(t => `- Tour: ${t.name} (ID: "${t.id}", Destination: "${t.destinationId}", Price: $${t.pricePerPerson}/person)`).join('\n');
     const destinationsContext = destinations.map(d => `- Destination: ${d.name} (ID: "${d.id}", Country: "${d.country}")`).join('\n');
+
+    const cruisesContext = [
+      '- Cruise: The Polar Expedition (ID: "polar-expedition", Antarctica & Arctic, $8,500/person, Vessel: MV Magellan Explorer, Embarkation: Ushuaia, Argentina, 12 Days, Route: Ushuaia → Drake Passage → Antarctic Peninsula → South Shetland Islands. Activities: Zodiac landings, helicopter scouting, penguin spotting, marine science labs)',
+      '- Cruise: Mediterranean Ultra-Luxe (ID: "mediterranean-charter", Amalfi Coast & Cyclades, $12,400/person, Vessel: The Solaris II Mega Yacht, Embarkation: Naples, Italy, 9 Days, Route: Monaco → Amalfi Coast → Aeolian Islands → Cyclades & Santorini → Mykonos. Activities: Stern folding beach club, hot stone sauna, Michelin team, private tenders)',
+      '- Cruise: Nile Royal Sanctuary (ID: "nile-sanctuary", Ancient Egypt Luxor to Aswan, $6,800/person, Vessel: The Dahabiya Cleopatra, Embarkation: Luxor, Egypt, 8 Days, Route: Luxor → Esna → Edfu → Kom Ombo → Aswan. Activities: Private Egyptologist, starlight temple visits, sunset felucca sailing)',
+      '- Cruise: South Pacific Atoll Explorer (ID: "south-pacific-atolls", Fiji, Tonga & French Polynesia, $9,950/person, Vessel: Le Pacific Wind Catamaran, Embarkation: Papeete, Tahiti, 14 Days, Route: Tahiti → Moorea → Bora Bora → Tuamotu Archipelago → Marquesas Wild Peaks → Return. Activities: PADI dive master diving, overwater glass-floor catamaran suites, private island beach barbecues)'
+    ].join('\n');
+
+    const privateChartersContext = [
+      '- Private Jet: Gulfstream G650ER heavy jet (ID: "jet-g650", $12,000/hr, Capacity: up to 16, Features: Caviar & vintage tasting bar, custom leather master stateroom, Ka-Band satellite Wi-Fi, personal flight coordinator)',
+      '- Private Jet: Bombardier Global 7500 ultra jet (ID: "jet-global7500", $14,500/hr, Capacity: up to 19, Features: Michelin gourmet kitchen, en-suite shower, premium French lotions, Nuage zero-gravity lounge chairs, advanced sound suppression)',
+      '- Superyacht: The Solaris 120m Mega Yacht (ID: "yacht-solaris", $28,000/hr, Capacity: up to 36 guests, Features: Dual heli-decks, glass-bottom thermal pool & sauna complex, custom water sports garage with jet skis, 40-member elite crew)',
+      '- Private Estate: Necker Island Private Island Retreat (ID: "island-necker", $105,000/night exclusive buyout, Capacity: Exclusive buyouts only, Features: 74-acre private island, catamaran charters, deep reef dive gear, tennis coaches, gourmet open bar)'
+    ].join('\n');
 
     const formattedPrompt = `You are matching options from our live catalogs.
 To ensure low latency, we provide a compact visual index of items. Use search tools (e.g., getHotels, getRestaurants, getTours) to fetch rich descriptions, reviews, and detailed attributes as needed.
@@ -963,6 +1103,12 @@ ${toursContext}
 [DESTINATIONS]
 ${destinationsContext}
 
+[CRUISES]
+${cruisesContext}
+
+[PRIVATE AIR & SEA CHARTERS]
+${privateChartersContext}
+
 User Message: "${message}"`;
 
     // Define tools (same as before)
@@ -978,11 +1124,28 @@ User Message: "${message}"`;
         { name: 'submitReview', description: 'Submit a review.', parameters: { type: Type.OBJECT, properties: { targetId: { type: Type.STRING }, targetType: { type: Type.STRING, enum: ['hotel','tour','restaurant','destination'] }, author: { type: Type.STRING }, rating: { type: Type.INTEGER, minimum:1, maximum:5 }, comment: { type: Type.STRING } }, required: ['targetId','targetType','author','rating','comment'] } },
         { name: 'convertCurrency', description: 'Convert amount between currencies.', parameters: { type: Type.OBJECT, properties: { amount: { type: Type.NUMBER }, fromCurrency: { type: Type.STRING, enum: ['USD','EUR','JPY','GBP','INR'] }, toCurrency: { type: Type.STRING, enum: ['USD','EUR','JPY','GBP','INR'] } }, required: ['amount','fromCurrency','toCurrency'] } },
         { name: 'getMemberStatus', description: 'Get member profile.', parameters: { type: Type.OBJECT, properties: {} } },
+        { name: 'getCruisesAndCharters', description: 'Get details of our luxury cruises (Polar Expedition, Mediterranean Ultra-Luxe, Nile Royal Sanctuary, South Pacific Atoll) and private air/sea charters (Gulfstream G650, Bombardier Global 7500, Solaris Yacht, Necker Island).', parameters: { type: Type.OBJECT, properties: { query: { type: Type.STRING, description: 'Optional keyword to search for, e.g., polar, jet, yacht, island.' } } } },
       ]
     }];
 
     // Build contents history
-    const contents: any[] = [];
+    interface FunctionArgs {
+      destinationId?: string;
+      targetId?: string;
+      targetType?: 'hotel' | 'tour' | 'restaurant' | 'destination';
+      date?: string;
+      quantity?: number;
+      bookingId?: string;
+      author?: string;
+      rating?: number;
+      comment?: string;
+      amount?: number;
+      fromCurrency?: string;
+      toCurrency?: string;
+      query?: string;
+    }
+
+    const contents: { role: 'user' | 'model'; parts: { text?: string }[] }[] = [];
     if (Array.isArray(history)) {
       history.forEach(h => {
         contents.push({
@@ -993,7 +1156,7 @@ User Message: "${message}"`;
     }
     contents.push({ role: 'user', parts: [{ text: formattedPrompt }] });
 
-    let richData: any = undefined;
+    let richData: Record<string, unknown> | undefined = undefined;
 
     if (ai) {
       try {
@@ -1010,8 +1173,8 @@ User Message: "${message}"`;
           const logs: string[] = [];
 
           for (const call of functionCalls) {
-            const { name, args } = call as any;
-            let result: any = null;
+            const { name, args } = call as { name: string; args: FunctionArgs };
+            let result: unknown = null;
 
             try {
               // Execute function (simplified inline to avoid duplication)
@@ -1027,8 +1190,9 @@ User Message: "${message}"`;
                   }
                   
                   result = matchedHotels;
-                  if (result.length) {
-                    const first = result[0];
+                  const resArray = result as Hotel[];
+                  if (resArray && resArray.length) {
+                    const first = resArray[0];
                     richData = {
                       type: 'hotel',
                       title: first.name,
@@ -1052,8 +1216,9 @@ User Message: "${message}"`;
                   }
                   
                   result = matchedTours;
-                  if (result.length) {
-                    const first = result[0];
+                  const resArray = result as Tour[];
+                  if (resArray && resArray.length) {
+                    const first = resArray[0];
                     richData = {
                       type: 'tour',
                       title: first.name,
@@ -1077,8 +1242,9 @@ User Message: "${message}"`;
                   }
                   
                   result = matchedRestaurants;
-                  if (result.length) {
-                    const first = result[0];
+                  const resArray = result as Restaurant[];
+                  if (resArray && resArray.length) {
+                    const first = resArray[0];
                     richData = {
                       type: 'restaurant',
                       title: first.name,
@@ -1093,8 +1259,9 @@ User Message: "${message}"`;
                 }
                 case 'getDestinations': {
                   result = destinations;
-                  if (result.length) {
-                    const first = result[0];
+                  const resArray = result as Destination[];
+                  if (resArray && resArray.length) {
+                    const first = resArray[0];
                     richData = {
                       type: 'destination',
                       title: first.name,
@@ -1107,8 +1274,12 @@ User Message: "${message}"`;
                   }
                   break;
                 }
-                case 'createBooking': {
-                  const { targetId, targetType, date, quantity } = args;
+                 case 'createBooking': {
+                  const targetId = args.targetId || '';
+                  const rawType = args.targetType || 'hotel';
+                  const targetType: 'hotel' | 'restaurant' | 'tour' = rawType === 'destination' ? 'hotel' : rawType;
+                  const date = args.date || new Date().toISOString().split('T')[0];
+                  const quantity = Number(args.quantity || 1);
                   let targetName = 'Bespoke Reservation';
                   let targetImage = '';
                   let price = 0;
@@ -1129,12 +1300,12 @@ User Message: "${message}"`;
                     targetName,
                     targetImage: targetImage || 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80',
                     date,
-                    quantity: Number(quantity),
-                    totalPrice: price * Number(quantity),
+                    quantity,
+                    totalPrice: price * quantity,
                     status: 'confirmed',
                   };
                   bookings.unshift(newBooking);
-                  const item = tours.find(t => t.id === targetId) || hotels.find(h => h.id === targetId) || restaurants.find(r => r.id === targetId);
+                  const item = targetId ? (tours.find(t => t.id === targetId) || hotels.find(h => h.id === targetId) || restaurants.find(r => r.id === targetId)) : undefined;
                   if (item && 'reviewsCount' in item) item.reviewsCount += 1;
                   result = { success: true, booking: newBooking };
                   richData = {
@@ -1180,18 +1351,22 @@ User Message: "${message}"`;
                   break;
                 }
                 case 'submitReview': {
-                  const { targetId, targetType, author, rating, comment } = args;
+                  const targetId = args.targetId || '';
+                  const targetType = args.targetType || 'hotel';
+                  const author = args.author || 'Anonymous';
+                  const rating = Number(args.rating || 5);
+                  const comment = args.comment || '';
                   const newReview: Review = {
                     id: `rev-${Date.now()}`,
                     targetId,
                     targetType,
                     author,
-                    rating: Number(rating),
+                    rating,
                     comment,
                     date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
                   };
                   reviews.unshift(newReview);
-                  updateTargetRating(targetId, targetType, Number(rating));
+                  updateTargetRating(targetId, targetType, rating);
                   result = newReview;
                   richData = {
                     type: 'review',
@@ -1204,7 +1379,9 @@ User Message: "${message}"`;
                   break;
                 }
                 case 'convertCurrency': {
-                  const { amount, fromCurrency, toCurrency } = args;
+                  const amount = Number(args.amount || 0);
+                  const fromCurrency = args.fromCurrency || 'USD';
+                  const toCurrency = args.toCurrency || 'USD';
                   const rates: Record<string, number> = { USD: 1, EUR: 0.92, JPY: 155, GBP: 0.78, INR: 96.5 };
                   const usdAmount = amount / (rates[fromCurrency.toUpperCase()] || 1);
                   const converted = usdAmount * (rates[toCurrency.toUpperCase()] || 1);
@@ -1224,12 +1401,40 @@ User Message: "${message}"`;
                   result = user || { name: 'Esteemed Guest', email: 'guest@wanderluxe.vip', points: 0, tier: 'Unregistered Guest' };
                   break;
                 }
+                case 'getCruisesAndCharters': {
+                  const q = (args.query || '').toLowerCase();
+                  if (q) {
+                    result = cruisesAndCharters.filter(c => 
+                      c.name.toLowerCase().includes(q) || 
+                      c.description.toLowerCase().includes(q) || 
+                      c.type.toLowerCase().includes(q) ||
+                      (c.destination || '').toLowerCase().includes(q)
+                    );
+                  } else {
+                    result = cruisesAndCharters;
+                  }
+                  
+                  if (Array.isArray(result) && result.length) {
+                    const first = result[0];
+                    richData = {
+                      type: 'currency', // Style as blue/cyan for high-end luxury assets
+                      title: first.name,
+                      subtitle: first.description,
+                      price: first.price,
+                      meta: first.type === 'cruise' ? `Duration: ${first.duration}` : `Capacity: ${first.capacity}`,
+                      url: first.type === 'cruise' ? `/cruises/${first.id === 'polar-expedition' ? 'polar' : ''}` : '/jets',
+                      linkView: 'jets-cruises'
+                    };
+                  }
+                  break;
+                }
                 default:
                   throw new Error(`Unknown function: ${name}`);
               }
               logs.push(`✅ ${name} executed successfully`);
-            } catch (execErr: any) {
-              logs.push(`❌ ${name} failed: ${execErr.message}`);
+            } catch (execErr: unknown) {
+              const errMsg = execErr instanceof Error ? execErr.message : String(execErr);
+              logs.push(`❌ ${name} failed: ${errMsg}`);
             }
           }
 
@@ -1238,7 +1443,7 @@ User Message: "${message}"`;
             model: 'gemini-3.5-flash',
             contents: [
               ...contents,
-              { role: 'model', parts: [{ text: `Understood. I am initiating the required real-time database actions: ${functionCalls.map((c: any) => c.name).join(', ')}.` }] },
+              { role: 'model', parts: [{ text: `Understood. I am initiating the required real-time database actions: ${functionCalls.map((c: unknown) => (c as { name: string }).name).join(', ')}.` }] },
               { role: 'user', parts: [{ text: `SYSTEM LOGS:\n${logs.join('\n')}\n\nPlease generate a highly professional, polite, elegant, and friendly travel concierge response confirming these results to the traveler. Highlight that their reservation/action is successfully updated in their live dashboard instantly.` }] }
             ],
             config: { systemInstruction, temperature: 0.5 }
@@ -1257,8 +1462,9 @@ User Message: "${message}"`;
           return;
         }
         throw new Error('Empty AI response');
-      } catch (aiErr: any) {
-        console.warn('[AI] Chat fallback triggered:', aiErr.message);
+      } catch (aiErr: unknown) {
+        const errMsg = aiErr instanceof Error ? aiErr.message : String(aiErr);
+        console.warn('[AI] Chat fallback triggered:', errMsg);
       }
     }
 
@@ -1373,8 +1579,9 @@ app.post('/api/itinerary', validate(itinerarySchema), async (req, res, next) => 
           return;
         }
         throw new Error('Empty itinerary response');
-      } catch (aiErr: any) {
-        console.warn('[AI] Itinerary fallback triggered:', aiErr.message);
+      } catch (aiErr: unknown) {
+        const errMsg = aiErr instanceof Error ? aiErr.message : String(aiErr);
+        console.warn('[AI] Itinerary fallback triggered:', errMsg);
       }
     }
 
@@ -1393,7 +1600,7 @@ app.post('/api/itinerary', validate(itinerarySchema), async (req, res, next) => 
 // ----------------------------------------------------------------------
 function generateMockItinerary(destination: string, days: number, budget: string, interests: string[]): Itinerary {
   // Destination‑specific templates (simplified)
-  const templates: Record<string, any> = {
+  const templates: Record<string, { summary: string; tips: string[] }> = {
     'bali': {
       summary: 'Immerse yourself in the spiritual heart of Indonesia with rice terraces, volcanic sunrises, and exquisite local cuisine.',
       tips: ['Respect temple dress codes', 'Try the local coffee', 'Learn a few Balinese phrases'],
@@ -1447,7 +1654,7 @@ function generateMockItinerary(destination: string, days: number, budget: string
 // ----------------------------------------------------------------------
 // Global Error Handler
 // ----------------------------------------------------------------------
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((err: { status?: number; message?: string; stack?: string }, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error('[Server Error]', err.stack || err.message);
   const status = err.status || 500;
   const message = err.message || 'Internal Server Error';

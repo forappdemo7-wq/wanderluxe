@@ -45,7 +45,7 @@ export default function TourPackage({ params }: { params: Promise<{ id: string }
       <div className="min-h-screen pt-20 flex items-center justify-center bg-white">
         <div className="text-center">
           <h1 className="text-4xl font-black mb-4">Tour Not Found</h1>
-          <p className="text-gray-500 mb-8">The tour you're looking for doesn't exist.</p>
+          <p className="text-gray-500 mb-8">The tour you&apos;re looking for doesn&apos;t exist.</p>
           <Link
             href="/"
             className="inline-flex items-center gap-2 bg-gray-900 text-white px-6 py-3 rounded-full hover:bg-blue-600 transition-colors"

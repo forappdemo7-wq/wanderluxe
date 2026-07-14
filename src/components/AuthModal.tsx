@@ -22,8 +22,11 @@ export default function AuthModal({
   // Reset view when modal closes
   useEffect(() => {
     if (!isOpen) {
-      setTimeout(() => setView("social"), 300);
-      setIsLoading(false);
+      const timer = setTimeout(() => {
+        setView("social");
+        setIsLoading(false);
+      }, 300);
+      return () => clearTimeout(timer);
     }
   }, [isOpen]);
 
@@ -162,7 +165,7 @@ export default function AuthModal({
                     </button>
                     
                     <p className="mt-6 text-gray-500 text-[11px] font-medium tracking-wide">
-                      Don't have an account?{" "}
+                      Don&apos;t have an account?{" "}
                       <button onClick={() => setView("signup")} className="text-blue-400 font-black hover:underline">
                         JOIN NOW
                       </button>

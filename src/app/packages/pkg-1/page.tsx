@@ -57,7 +57,10 @@ export default function RoyalRajasthanPackage() {
   });
 
   useEffect(() => {
-    setMounted(true);
+    const timer = setTimeout(() => {
+      setMounted(true);
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -259,7 +262,7 @@ export default function RoyalRajasthanPackage() {
                   className="h-16 flex items-center justify-center bg-emerald-500/20 border border-emerald-500/30 rounded-2xl text-emerald-400 gap-3 font-medium"
                 >
                   <CheckCircle2 size={24} />
-                  Booking Request Received! We'll contact you soon.
+                  Booking Request Received! We&apos;ll contact you soon.
                 </motion.div>
               ) : (
                 <motion.button

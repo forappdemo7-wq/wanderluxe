@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion, useScroll, useTransform, MotionValue } from 'framer-motion';
 import { 
   Mountain, Wind, Map, Compass, Tent, 
   Clock, Star, ArrowRight, Crown, 
@@ -39,10 +39,10 @@ const trekPoints = [
 ];
 
 // Simple helper component to animate the altitude display
-function AnimatedAltitude({ value }) {
+function AnimatedAltitude({ value }: { value: MotionValue<number> }) {
   const [display, setDisplay] = useState(2430);
   useEffect(() => {
-    return value.on("change", (latest) => setDisplay(Math.round(latest)));
+    return value.on("change", (latest: number) => setDisplay(Math.round(latest)));
   }, [value]);
   return <>{display}m</>;
 }
@@ -53,7 +53,10 @@ export default function MachuPicchuPage() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    const timer = setTimeout(() => {
+      setMounted(true);
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const { scrollYProgress } = useScroll();

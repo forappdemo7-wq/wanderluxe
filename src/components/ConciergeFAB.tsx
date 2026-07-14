@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence, useDragControls } from 'motion/react';
-import { Send, X, Sparkles, Compass, AlertCircle, MoreHorizontal, MessageSquare, CornerDownLeft, Bot, User, HelpCircle, Search, ArrowUp, RotateCcw } from 'lucide-react';
+import { Send, X, Sparkles, Compass, AlertCircle, MoreHorizontal, MessageSquare, CornerDownLeft, Bot, User, HelpCircle, Search, ArrowRight, RotateCcw } from 'lucide-react';
 import { useCurrency } from '../context/CurrencyContext';
 import { useCursor } from '../context/CursorContext';
 import ReactMarkdown from 'react-markdown';
@@ -25,6 +25,9 @@ interface Message {
     price?: string;
     meta?: string;
     linkView?: string;
+    url?: string;
+    id?: string;
+    image?: string;
   };
 }
 
@@ -43,6 +46,19 @@ export default function ConciergeFAB({ activeView, setActiveView, onSyncData, us
   const router = useRouter();
   const { formatPrice } = useCurrency();
   const { butlerEnabled } = useCursor();
+
+  // Helper to dynamically convert and format USD prices in rich concierge cards
+  const displayPrice = (rawPrice: string | number | undefined | null) => {
+    if (typeof rawPrice !== 'string') return rawPrice || '';
+    const regex = /\$([0-9,.]+)/g;
+    return rawPrice.replace(regex, (match, amountStr) => {
+      const usdValue = parseFloat(amountStr.replace(/,/g, ''));
+      if (!isNaN(usdValue)) {
+        return formatPrice(usdValue);
+      }
+      return match;
+    });
+  };
   
   const [isOpen, setIsOpen] = useState(false);
   const dragControls = useDragControls();
@@ -179,7 +195,10 @@ export default function ConciergeFAB({ activeView, setActiveView, onSyncData, us
       const data = await response.json();
       
       // Attempt to identify structured elements in the response to show interactive luxury cards
-      let richCard: any = data.richData || undefined;
+      let richCard: Message['richData'] = undefined;
+      if (data.richData) {
+        richCard = data.richData as Message['richData'];
+      }
       const responseText = data.response || "";
 
       // Smart semantic override to match signature items mentioned in prompt or response
@@ -410,8 +429,8 @@ export default function ConciergeFAB({ activeView, setActiveView, onSyncData, us
       };
 
       setMessages((prev) => [...prev, butlerMsg]);
-    } catch (err: any) {
-      setError(err.message || "Something went wrong.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
       setIsTyping(false);
     }
@@ -426,7 +445,17 @@ export default function ConciergeFAB({ activeView, setActiveView, onSyncData, us
     handleSendMessage(q);
   };
 
-  const handleExploreNow = (richData: any) => {
+  const handleExploreNow = (richData: {
+    type?: string;
+    title?: string;
+    subtitle?: string;
+    price?: string;
+    meta?: string;
+    image?: string;
+    id?: string;
+    url?: string;
+    linkView?: string;
+  } | null | undefined) => {
     if (!richData) return;
 
     let route = "";
@@ -709,7 +738,7 @@ export default function ConciergeFAB({ activeView, setActiveView, onSyncData, us
                                 msg.richData.type === 'booking' ? 'text-emerald-400' :
                                 msg.richData.type === 'currency' ? 'text-cyan-400' :
                                 'text-amber-400'
-                              }`}>{msg.richData.price}</span>
+                              }`}>{displayPrice(msg.richData.price)}</span>
                             </div>
                             <button
                               onClick={() => {
@@ -849,9 +878,15 @@ export default function ConciergeFAB({ activeView, setActiveView, onSyncData, us
           /* 2. FLOATING ROBOT CHAT PILL BAR (HIGHLY AESTHETIC CHAT BOT PILL INSPIRED BY USER'S IMAGE) */
           <motion.button
             key="chat-pill"
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            variants={{
+              initial: { opacity: 0, y: 20, scale: 0.95 },
+              animate: { opacity: 1, y: 0, scale: 1 },
+              exit: { opacity: 0, y: 20, scale: 0.95 },
+              hover: { scale: 1.02 }
+            }}
             transition={{ duration: 0.25 }}
             onPointerDown={(e) => {
               // Drag start handled by parent container
@@ -861,7 +896,7 @@ export default function ConciergeFAB({ activeView, setActiveView, onSyncData, us
                 setIsOpen(true);
               }
             }}
-            whileHover={{ scale: 1.02 }}
+            whileHover="hover"
             whileTap={{ scale: 0.98 }}
             className="relative group flex items-center justify-between p-1.5 pl-6 pr-2 rounded-full border border-fuchsia-500/60 bg-gradient-to-r from-[#170024] via-[#330045] to-[#170024] text-white shadow-[0_0_35px_rgba(217,70,239,0.4),_inset_0_0_15px_rgba(217,70,239,0.2)] hover:shadow-[0_0_45px_rgba(217,70,239,0.7),_inset_0_0_20px_rgba(217,70,239,0.35)] hover:border-fuchsia-400/80 transition-all duration-300 cursor-grab active:cursor-grabbing overflow-hidden w-[calc(100vw-48px)] sm:w-[480px]"
           >
@@ -879,9 +914,30 @@ export default function ConciergeFAB({ activeView, setActiveView, onSyncData, us
               </p>
             </div>
 
-            {/* Right Section: Circular White Gradient Button with ArrowUp Icon */}
-            <div className="relative w-11 h-11 rounded-full bg-gradient-to-b from-white to-slate-100 flex items-center justify-center shadow-[0_0_15px_rgba(255,255,255,0.4)] shrink-0 select-none pointer-events-none transition-transform duration-300 group-hover:scale-105">
-              <ArrowUp className="w-5 h-5 text-[#200330] stroke-[2.5]" />
+            {/* Right Section: Circular White Gradient Button with ArrowRight Icon that rotates to ArrowUp on hover */}
+            <div className="relative w-11 h-11 rounded-full bg-gradient-to-b from-white to-slate-100 flex items-center justify-center shadow-[0_0_15px_rgba(255,255,255,0.4)] shrink-0 select-none pointer-events-none transition-transform duration-300 group-hover:scale-105 overflow-hidden">
+              <motion.div
+                variants={{
+                  initial: { y: 0, rotate: 0 },
+                  hover: { y: -2, rotate: -90 }
+                }}
+                transition={{ type: "spring", stiffness: 900, damping: 32 }}
+                className="flex items-center justify-center"
+              >
+                <motion.div
+                  animate={{
+                    y: [0, -1.5, 0],
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                  className="flex items-center justify-center"
+                >
+                  <ArrowRight className="w-5 h-5 text-[#200330] stroke-[2.5]" />
+                </motion.div>
+              </motion.div>
             </div>
           </motion.button>
         )}
@@ -890,4 +946,3 @@ export default function ConciergeFAB({ activeView, setActiveView, onSyncData, us
     </motion.div>
   );
 }
-

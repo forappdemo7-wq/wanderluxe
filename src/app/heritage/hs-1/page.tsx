@@ -65,7 +65,10 @@ export default function HeritageDetailPage() {
   const parallaxBg = useTransform(scrollY, [0, 900], ["0%", "85%"]);
 
   useEffect(() => {
-    setMounted(true);
+    const timer = setTimeout(() => {
+      setMounted(true);
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   if (!mounted) return null;

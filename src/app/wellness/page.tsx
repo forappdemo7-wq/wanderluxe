@@ -83,7 +83,7 @@ export default function WellnessPage() {
         {/* Hero Quote Block */}
         <div className="space-y-8 mb-16 text-center max-w-2xl mx-auto">
           <p className="text-2xl text-gray-400 font-light italic leading-relaxed">
-            "Rejuvenation is the ultimate luxury—because it compounds in performance, clarity, and joy."
+            &ldquo;Rejuvenation is the ultimate luxury&mdash;because it compounds in performance, clarity, and joy.&rdquo;
           </p>
           <div className="h-px w-24 bg-blue-600 mx-auto" />
           <p className="text-gray-500 text-lg leading-relaxed">

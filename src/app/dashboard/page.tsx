@@ -160,41 +160,43 @@ export default function DashboardPage() {
 
   // Load state on mount
   useEffect(() => {
-    // 1. Load User
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch {
-        setUser(null);
+    const timer = setTimeout(() => {
+      // 1. Load User
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        try {
+          setUser(JSON.parse(storedUser));
+        } catch {
+          setUser(null);
+        }
       }
-    }
 
-    // 2. Load and seed Bookings if needed
-    const storedBookings = localStorage.getItem("bookings");
-    if (storedBookings) {
-      try {
-        setBookings(JSON.parse(storedBookings));
-      } catch {
+      // 2. Load and seed Bookings if needed
+      const storedBookings = localStorage.getItem("bookings");
+      if (storedBookings) {
+        try {
+          setBookings(JSON.parse(storedBookings));
+        } catch {
+          setBookings(DEFAULT_BOOKINGS);
+          localStorage.setItem("bookings", JSON.stringify(DEFAULT_BOOKINGS));
+        }
+      } else {
         setBookings(DEFAULT_BOOKINGS);
         localStorage.setItem("bookings", JSON.stringify(DEFAULT_BOOKINGS));
       }
-    } else {
-      setBookings(DEFAULT_BOOKINGS);
-      localStorage.setItem("bookings", JSON.stringify(DEFAULT_BOOKINGS));
-    }
 
-    // 3. Load gift status
-    const isGiftClaimed = localStorage.getItem("wl_welcome_gift_claimed") === "true";
-    setGiftClaimed(isGiftClaimed);
+      // 3. Load gift status
+      const isGiftClaimed = localStorage.getItem("wl_welcome_gift_claimed") === "true";
+      setGiftClaimed(isGiftClaimed);
 
-    // 4. Load claimed perks
-    const storedPerks = localStorage.getItem("wl_claimed_perks");
-    if (storedPerks) {
-      try { setClaimedPerks(JSON.parse(storedPerks)); } catch { }
-    }
+      // 4. Load claimed perks
+      const storedPerks = localStorage.getItem("wl_claimed_perks");
+      if (storedPerks) {
+        try { setClaimedPerks(JSON.parse(storedPerks)); } catch { }
+      }
 
-    setLoading(false);
+      setLoading(false);
+    }, 0);
 
     // Synchronize updates
     const syncUpdates = () => {
@@ -211,6 +213,7 @@ export default function DashboardPage() {
     window.addEventListener("userUpdate", syncUpdates);
     window.addEventListener("bookingsUpdate", syncUpdates);
     return () => {
+      clearTimeout(timer);
       window.removeEventListener("userUpdate", syncUpdates);
       window.removeEventListener("bookingsUpdate", syncUpdates);
     };

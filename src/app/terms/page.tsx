@@ -81,7 +81,7 @@ export default function TermsPage() {
               <span className="absolute left-0 top-6 -translate-x-1/2 w-3 h-3 bg-blue-600 rounded-full shadow-[0_0_15px_rgba(37,99,235,0.6)]"></span>
 
               <h3 className="text-sm font-black text-blue-500 uppercase tracking-[0.3em] mb-2">
-                {item.id} // Protocol
+                {item.id} {/* Protocol */}
               </h3>
 
               <h4 className="text-2xl font-bold mb-4 tracking-tight uppercase">

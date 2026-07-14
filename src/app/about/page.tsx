@@ -15,7 +15,7 @@ export default function AboutPage() {
             Defining <br /><span className="text-blue-500">The Elite</span> <br />Experience
           </h1>
           <p className="text-gray-400 text-xl md:text-2xl font-medium leading-relaxed max-w-3xl">
-            Wanderluxe was born from a singular obsession: to curate journeys that don't just move you geographically, but transform you personally.
+            Wanderluxe was born from a singular obsession: to curate journeys that don&apos;t just move you geographically, but transform you personally.
           </p>
         </header>
 
@@ -25,7 +25,7 @@ export default function AboutPage() {
                 <Globe className="text-blue-500" size={32} />
                 <h3 className="text-2xl font-bold uppercase tracking-tight">Global Reach</h3>
              </div>
-             <p className="text-gray-400 leading-relaxed text-lg">With local curators in over 40 countries, we provide access to locations that aren't on any map.</p>
+             <p className="text-gray-400 leading-relaxed text-lg">With local curators in over 40 countries, we provide access to locations that aren&apos;t on any map.</p>
           </div>
           <div className="bg-white/5 border border-white/10 p-12 rounded-[3.5rem] backdrop-blur-xl">
              <div className="flex gap-4 mb-8">
