@@ -194,7 +194,7 @@ export default function AlpineLuxuryExpress() {
             <div>
               <div className="uppercase tracking-widest text-xs text-amber-400 mb-2">Starting from</div>
               <div className="text-6xl font-bold tracking-tighter">
-                {formatPrice(2800)}
+                {formatPrice(4500)}
               </div>
               <div className="text-gray-400 mt-1">per person • Double occupancy</div>
             </div>

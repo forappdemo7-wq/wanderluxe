@@ -17,7 +17,7 @@ dotenv.config();
 // Configuration
 // ----------------------------------------------------------------------
 const config = {
-  port: 3000,
+  port: parseInt(process.env.PORT || '3000', 10),
   nodeEnv: process.env.NODE_ENV || 'development',
   geminiApiKey: process.env.GEMINI_API_KEY || '',
   isProduction: process.env.NODE_ENV === 'production',
@@ -1205,7 +1205,7 @@ User Message: "${message}"`;
                 }
                 case 'convertCurrency': {
                   const { amount, fromCurrency, toCurrency } = args;
-                  const rates: Record<string, number> = { USD: 1, EUR: 0.92, JPY: 155, GBP: 0.78, INR: 83.5 };
+                  const rates: Record<string, number> = { USD: 1, EUR: 0.92, JPY: 155, GBP: 0.78, INR: 96.5 };
                   const usdAmount = amount / (rates[fromCurrency.toUpperCase()] || 1);
                   const converted = usdAmount * (rates[toCurrency.toUpperCase()] || 1);
                   result = { originalAmount: amount, from: fromCurrency, to: toCurrency, converted: Number(converted.toFixed(2)), rate: (rates[toCurrency.toUpperCase()] || 1) / (rates[fromCurrency.toUpperCase()] || 1) };

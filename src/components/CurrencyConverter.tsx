@@ -8,7 +8,7 @@ const rates: Record<string, number> = {
   USD: 1,
   EUR: 0.92,
   GBP: 0.79,
-  INR: 93.32,
+  INR: 96.5,
   JPY: 150.50,
   AUD: 1.52,
 };

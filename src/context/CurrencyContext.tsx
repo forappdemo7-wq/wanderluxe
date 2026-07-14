@@ -19,7 +19,7 @@ export const CurrencyProvider = ({ children }: { children: React.ReactNode }) =>
   const formatPrice = (priceUSD: number) => {
     const rates: Record<Currency, number> = {
       USD: 1,
-      INR: 95.32,
+      INR: 96.32,
       JPY: 158.2,
       EUR: 0.86
     };
